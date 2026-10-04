@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   const places = experience.map((e) => {
-    const project = getProjectBySlug(e.previewProject)!;
+    const project = getProjectBySlug(e.previewProjects[0])!;
     return { ...e, image: project.cover, alt: project.images[project.coverIndex].alt };
   });
 

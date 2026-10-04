@@ -1,5 +1,5 @@
 import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
-import { HoverLine } from "@/components/ui/HoverLine";
+import { ArrowLink } from "@/components/ui/ArrowLink";
 import { notFound } from "@/content/pages";
 
 export default function NotFound() {
@@ -8,7 +8,7 @@ export default function NotFound() {
       <SplitTextReveal text={notFound.title} className="text-display max-w-[14ch]" />
       <p className="text-body mt-8 max-w-md text-muted">{notFound.text}</p>
       <p className="text-label mt-10">
-        <HoverLine href="/works">{notFound.cta.toUpperCase()} →</HoverLine>
+        <ArrowLink href="/works">{notFound.cta.toUpperCase()}</ArrowLink>
       </p>
     </div>
   );

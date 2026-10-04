@@ -57,7 +57,10 @@ export default function ContactPage() {
 
             <div className="grid gap-2 border-b border-line/15 py-8 md:col-span-12 md:grid-cols-12 md:gap-6">
               <dt className="text-label text-muted md:col-span-3">{contact.locationLabel}</dt>
-              <dd className="text-body md:col-span-9">{contact.locationValue}</dd>
+              <dd className="md:col-span-9">
+                <p className="text-title">{contact.locationCities}</p>
+                <p className="text-body mt-2 text-muted">{contact.locationNote}</p>
+              </dd>
             </div>
           </dl>
         </Reveal>

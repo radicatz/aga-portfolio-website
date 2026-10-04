@@ -10,11 +10,21 @@ export const home = {
 
 export const works = {
   title: "Karya",
+  /** Judul tampilan /works (2 baris, sejajar dengan judul kategori). */
+  heading: "Dari dapur sampai jalanan.",
   allLabel: "Semua",
   intro:
-    "Lima ruang kerja, satu cara melihat. Dari dapur restoran sampai rel kereta di sore hari, setiap proyek dimulai dari hal yang sama: memperhatikan cahaya sebelum menekan rana.",
+    "Lima ruang kerja, satu cara melihat. Setiap proyek dimulai dari hal yang sama: memperhatikan cahaya sebelum menekan rana.",
   backLabel: "Kembali ke",
   nextLabel: "Next",
+};
+
+export const lightbox = {
+  counterOf: "/",
+  close: "TUTUP",
+  previous: "SEBELUMNYA",
+  next: "SELANJUTNYA",
+  ariaLabel: "Galeri foto",
 };
 
 export const about = {
@@ -69,7 +79,8 @@ export const contact = {
   whatsappCta: "Chat via WhatsApp",
   instagramLabel: "Instagram",
   locationLabel: "Lokasi",
-  locationValue: "Tangerang · Jakarta, dan tersedia untuk proyek di luar kota",
+  locationCities: "Tangerang · Jakarta",
+  locationNote: "*available untuk project luar kota",
   copy: "Salin",
   copied: "Tersalin",
 };

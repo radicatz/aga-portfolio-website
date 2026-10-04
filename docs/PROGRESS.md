@@ -21,9 +21,9 @@ Status: `[ ]` belum · `[~]` sedang · `[x]` selesai. Perbarui di akhir setiap t
 - [ ] Alt text per foto masih generik (`altBase` + nomor); rapikan di F6
 
 ### F2 Fondasi
-- [x] Token light/dark, font (Instrument Serif + Manrope), layout, Lenis, transisi halaman
+- [x] Token light/dark, font (Le Murmure + Space Grotesk, sejak Revisi 1), layout, Lenis, transisi halaman
 - [x] `lib/motion.ts`, `HoverLine`, `SplitTextReveal`, `Reveal`
-- [x] Navbar + WorksDropdown + MobileMenu + ThemeToggle
+- [x] Navbar + MobileMenu + ThemeToggle (dropdown Works dihapus di Revisi 1)
 - [x] Footer + FooterCTA + WhatsAppFab (`WhatsAppPill`)
 
 ### F3 Home
@@ -44,6 +44,18 @@ Status: `[ ]` belum · `[~]` sedang · `[x]` selesai. Perbarui di akhir setiap t
 - [ ] Lighthouse mobile (Performance/Accessibility/SEO) belum dijalankan
 - [ ] OG image memakai teks saja; ganti dengan foto setelah ada foto profil
 - [ ] Count-up pada angka About (opsional, saat ini statis)
+
+### Revisi 1 (feedback visual)
+- [x] Font: Le Murmure (display) + Space Grotesk (body)
+- [x] Ikon Guidance + WhatsApp digambar ulang (telepon dipusatkan); panah aksi berputar ke ↗ (CTA footer, FAB, pil WhatsApp, Next, ArrowLink)
+- [x] Dropdown Works dihapus; CTA footer mengikuti ukuran heading; separator di atas footer dihapus
+- [x] Home: marquee melambat 25% saat hover + drag/inertia; garis hover indeks kategori di atas separator
+- [x] Works: judul "Dari dapur sampai jalanan." (2 baris); garis tab sejajar separator; galeri pasangan tinggi sama tanpa blok abu-abu
+- [x] Lightbox desain ulang sesuai `gallery.png` + animasi geser antarfoto
+- [x] Experience: banyak foto berganti saat kursor bergerak, tiap foto beda sudut
+- [x] Contact: kota Tangerang · Jakarta pakai font display; catatan "*available untuk project luar kota"
+- [x] Verifikasi: 42/42 uji interaksi, axe 0 pelanggaran, gambar <= 90 KB
+- [ ] Foto Jayatama untuk hover Experience (sementara memakai foto produk: ritual-kulit, penanda-waktu, batu-kilau)
 
 ### F7 Deploy
 - [ ] Vercel + domain (`site.url` di `src/content/site.ts` masih `https://agakhartadinata.com`; ganti bila domain berbeda)
@@ -68,6 +80,13 @@ Status: `[ ]` belum · `[~]` sedang · `[x]` selesai. Perbarui di akhir setiap t
 | 2026-10-04 | Light `--muted` #6E6D6D (referensi #7D7C7C) | Kontras 4.16:1 gagal WCAG AA; baru 5.1:1 |
 | 2026-10-04 | Filter /works tidak memakai animasi layout | Tiap tab adalah rute sendiri (URL bisa dibagikan); transisi berupa fade halaman + Reveal kartu. Animasi layout butuh state klien tunggal dan mengorbankan URL per kategori |
 | 2026-10-04 | Marquee tanpa drag; kartu tanpa gambar hover kedua | Mengikuti referensi (kecepatan konstan, hover = scale 0.9) |
+| 2026-10-05 | Font display Le Murmure, body Space Grotesk | Permintaan user (Revisi 1) |
+| 2026-10-05 | Ikon Guidance (CC BY 4.0); WhatsApp digambar ulang | Guidance tidak punya WhatsApp; user memilih redraw bergaya Guidance |
+| 2026-10-05 | Nama ikon panah Guidance terbalik; `icons.ts` dikunci per arah visual | `right-arrow` Guidance sebenarnya menunjuk kiri |
+| 2026-10-05 | Panah aksi berputar ke ↗ (-45°), bukan 180° | Permintaan user |
+| 2026-10-05 | Marquee hover 25% (`tickerEffectHoverModifier`) + draggable (`tickerEffectDraggable`) | Terlewat di analisis awal; dikonfirmasi dari bundle referensi |
+| 2026-10-05 | Galeri: pasangan foto tinggi sama, lebar sebanding rasio | Pilihan user; menghilangkan blok abu-abu tanpa crop |
+| 2026-10-05 | Judul /works "Dari dapur sampai jalanan." | Pilihan user |
 | 2026-10-04 | Context7 MCP didaftarkan di `.mcp.json` | Permintaan user: dokumentasi terbaru semua tech stack |
 
 ## Menunggu dari Aga (PLAN §8)

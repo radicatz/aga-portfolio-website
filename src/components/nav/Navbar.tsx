@@ -8,7 +8,6 @@ import { HoverLine } from "@/components/ui/HoverLine";
 import { site } from "@/content/site";
 import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
-import { WorksDropdown } from "./WorksDropdown";
 
 export type NavCategory = { slug: string; label: string; count: number };
 
@@ -37,25 +36,21 @@ export function Navbar({ categories }: { categories: NavCategory[] }) {
         className={`fixed inset-x-0 top-0 z-40 ${menuOpen ? "bg-transparent" : "bg-bg/85 backdrop-blur-md"}`}
       >
         <nav aria-label="Utama" className="container-site flex h-16 items-center justify-between">
-          <Link href="/" className="font-serif text-[20px] uppercase tracking-wide">
+          <Link href="/" className="font-display text-[22px] uppercase tracking-wide">
             {site.wordmark}
           </Link>
 
           <div className="hidden items-center gap-8 lg:flex">
-            {site.nav.map((item) =>
-              item.href === "/works" ? (
-                <WorksDropdown key={item.href} categories={categories} active={isActive("/works")} />
-              ) : (
-                <HoverLine
-                  key={item.href}
-                  href={item.href}
-                  className="text-label"
-                  aria-current={isActive(item.href) ? "page" : undefined}
-                >
-                  {item.label}
-                </HoverLine>
-              ),
-            )}
+            {site.nav.map((item) => (
+              <HoverLine
+                key={item.href}
+                href={item.href}
+                className="text-label"
+                aria-current={isActive(item.href) ? "page" : undefined}
+              >
+                {item.label}
+              </HoverLine>
+            ))}
             <ThemeToggle className="ml-4" />
           </div>
 

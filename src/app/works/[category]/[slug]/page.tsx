@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Reveal } from "@/components/motion/Reveal";
 import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
+import { ArrowLink } from "@/components/ui/ArrowLink";
 import { HoverLine } from "@/components/ui/HoverLine";
 import { Gallery } from "@/components/works/Gallery";
 import { NextProject } from "@/components/works/NextProject";
@@ -66,11 +67,13 @@ export default async function ProjectPage(props: PageProps<"/works/[category]/[s
       </Reveal>
 
       <div className="mt-16 md:mt-24">
-        <Gallery images={project.images} />
+        <Gallery images={project.images} title={project.title} story={project.story} />
       </div>
 
       <div className="mt-16 flex items-center justify-between text-label md:mt-24">
-        <HoverLine href={`/works/${cat.slug}`}>← {works.backLabel} {cat.label}</HoverLine>
+        <ArrowLink href={`/works/${cat.slug}`} direction="left">
+          {works.backLabel} {cat.label}
+        </ArrowLink>
       </div>
 
       {next && <NextProject href={`/works/${next.category}/${next.slug}`} title={next.title} />}

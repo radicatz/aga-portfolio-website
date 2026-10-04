@@ -28,5 +28,11 @@ export const site = {
   footer: {
     cta: "Mari Abadikan Cerita Anda",
     copyright: "© 2026 Aga Kharta Dinata · Tangerang, Indonesia",
+    // Wajib menurut lisensi CC BY 4.0 set ikon Guidance.
+    iconCredit: {
+      prefix: "Ikon:",
+      label: "Guidance oleh Streamline (CC BY 4.0)",
+      url: "https://github.com/webalys-hq/streamline-vectors",
+    },
   },
 } as const;

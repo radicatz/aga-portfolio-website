@@ -27,8 +27,8 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-surface: var(--surface);
-  --font-serif: var(--font-instrument), "Times New Roman", serif;
-  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-display: var(--font-display-face), "Arial Narrow", sans-serif;
+  --font-body: var(--font-body-face), system-ui, sans-serif;
   --breakpoint-tablet: 810px;
   --breakpoint-desktop: 1200px;
 }
@@ -40,7 +40,7 @@ html {
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -51,26 +51,26 @@ body {
 
 /* Tipografi: docs/DESIGN-SYSTEM.md §2 */
 @utility text-display {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(44px, 7vw, 96px);
-  line-height: 0.95;
-  letter-spacing: -0.01em;
+  font-size: clamp(48px, 7.5vw, 112px);
+  line-height: 0.92;
+  letter-spacing: 0;
 }
 
-@utility text-cta {
-  font-family: var(--font-serif);
+/* Judul panel (mis. cerita proyek di lightbox): satu tingkat di bawah text-display. */
+@utility text-heading {
+  font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(56px, 11vw, 160px);
-  line-height: 0.92;
-  letter-spacing: -0.015em;
+  font-size: clamp(40px, 4.6vw, 72px);
+  line-height: 0.95;
 }
 
 @utility text-title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(26px, 2.6vw, 36px);
-  line-height: 1.1;
+  font-size: clamp(28px, 2.8vw, 40px);
+  line-height: 1.05;
 }
 
 @utility text-body {
@@ -106,36 +106,67 @@ body {
   }
 }
 
-/* HoverLine: garis 1px tumbuh dari kiri (referensi: tween 0.5s, ease [.44,0,.56,1]).
-   Aktif pada hover, fokus keyboard, dan halaman/tab aktif. */
-.hover-line {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
+@layer components {
+  /* HoverLine: garis 1px tumbuh dari kiri (referensi: tween 0.5s, ease [.44,0,.56,1]).
+     Aktif pada hover, fokus keyboard, dan halaman/tab aktif. Di dalam @layer agar utilitas Tailwind bisa menimpa. */
+  .hover-line {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
 
-.hover-line::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -3px;
-  height: 1px;
-  width: 1px;
-  opacity: 0;
-  background: currentColor;
-  transition:
-    width 0.5s cubic-bezier(0.44, 0, 0.56, 1),
-    opacity 0.5s cubic-bezier(0.44, 0, 0.56, 1);
-}
+  .hover-line::after,
+  .hover-rule::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    height: 1px;
+    width: 1px;
+    opacity: 0;
+    background: currentColor;
+    transition:
+      width 0.5s cubic-bezier(0.44, 0, 0.56, 1),
+      opacity 0.5s cubic-bezier(0.44, 0, 0.56, 1);
+  }
 
-.hover-line:hover::after,
-.hover-line:focus-visible::after,
-.group:hover > .hover-line::after,
-.group:focus-visible > .hover-line::after,
-.hover-line[aria-current="page"]::after,
-.hover-line[data-active="true"]::after {
-  width: 100%;
-  opacity: 1;
+  .hover-line::after {
+    bottom: -3px;
+  }
+
+  /* HoverRule: garis yang tumbuh TEPAT di atas separator border-b (baris indeks kategori, tab /works).
+     Elemen harus menempel ke tepi bawah kontainer yang punya border-b. */
+  .hover-rule {
+    position: relative;
+  }
+
+  .hover-rule::after {
+    bottom: -1px;
+    background: var(--fg);
+  }
+
+  .hover-line:hover::after,
+  .hover-line:focus-visible::after,
+  .hover-line[aria-current="page"]::after,
+  .hover-line[data-active="true"]::after,
+  .group:hover > .hover-line::after,
+  .group:focus-visible > .hover-line::after,
+  .hover-rule:hover::after,
+  .hover-rule:focus-visible::after,
+  .hover-rule[aria-current="page"]::after,
+  .hover-rule[data-active="true"]::after {
+    width: 100%;
+    opacity: 1;
+  }
+
+  /* Panah aksi: → berputar menjadi ↗ saat induk .group di-hover/fokus. */
+  .arrow-ne {
+    transition: transform 0.5s cubic-bezier(0.44, 0, 0.56, 1);
+  }
+
+  .group:hover .arrow-ne,
+  .group:focus-visible .arrow-ne {
+    transform: rotate(-45deg);
+  }
 }
 
 :focus-visible {
@@ -150,7 +181,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hover-line::after {
+  .hover-line::after,
+  .hover-rule::after,
+  .arrow-ne {
     transition: none;
   }
   ::view-transition-group(*),

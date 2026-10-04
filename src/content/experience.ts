@@ -10,8 +10,8 @@ export const experience: ExperienceItem[] = [
     role: "Photographer",
     description:
       "Memproduksi foto produk dan materi visual untuk kanal digital perusahaan, termasuk konten untuk program kemitraan.",
-    previewProject: "ritual-kulit",
-    todo: "Deskripsi masih asumsi dari judul video. Verifikasi ke Aga. Foto preview sementara.",
+    previewProjects: ["ritual-kulit", "penanda-waktu", "batu-kilau"],
+    todo: "Deskripsi masih asumsi dari judul video. Foto preview sementara (belum ada foto Jayatama); ganti saat tersedia.",
   },
   {
     period: "2023 — 2025",
@@ -19,7 +19,7 @@ export const experience: ExperienceItem[] = [
     role: "Photographer",
     description:
       "Memotret menu harian dan musiman untuk layanan katering sehat, serta aset visual untuk konten edukasi gizi di media sosial.",
-    previewProject: "meja-ramadan",
+    previewProjects: ["meja-ramadan", "hidangan-rumahan"],
   },
   {
     period: "2018 — 2023",
@@ -27,7 +27,7 @@ export const experience: ExperienceItem[] = [
     role: "Photographer",
     description:
       "Lima tahun bersama grup restoran Jepang: memotret omakase, sushi, sake, dan hidangan musiman untuk menu, katalog, dan media sosial beberapa outlet.",
-    previewProject: "omakase-sake",
+    previewProjects: ["omakase-sake"],
   },
 ];
 

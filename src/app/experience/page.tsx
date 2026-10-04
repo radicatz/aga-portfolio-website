@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ExperienceList } from "@/components/experience/ExperienceList";
 import { Reveal } from "@/components/motion/Reveal";
 import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
-import { HoverLine } from "@/components/ui/HoverLine";
+import { ArrowLink } from "@/components/ui/ArrowLink";
 import { certifications, communities, experience, experienceIntro } from "@/content/experience";
 import { experiencePage } from "@/content/pages";
 import { getProjectBySlug } from "@/content/projects";
@@ -12,13 +12,22 @@ export const metadata: Metadata = {
   description: experienceIntro,
 };
 
+const MAX_PREVIEW = 8;
+
+/** Kumpulkan foto dari beberapa proyek, lalu ambil maksimal MAX_PREVIEW secara merata agar tiap proyek terwakili. */
+function pickImages(slugs: string[]) {
+  const all = slugs.flatMap((slug) => getProjectBySlug(slug)?.images.map((i) => i.src) ?? []);
+  if (all.length <= MAX_PREVIEW) return all;
+  return Array.from({ length: MAX_PREVIEW }, (_, i) => all[Math.floor((i * all.length) / MAX_PREVIEW)]);
+}
+
 export default function ExperiencePage() {
   const rows = experience.map((e) => ({
     period: e.period,
     company: e.company,
     role: e.role,
     description: e.description,
-    image: getProjectBySlug(e.previewProject)!.cover,
+    images: pickImages(e.previewProjects),
   }));
 
   return (
@@ -57,7 +66,7 @@ export default function ExperiencePage() {
       </div>
 
       <p className="py-section text-label">
-        <HoverLine href="/works">{experiencePage.cta.toUpperCase()} →</HoverLine>
+        <ArrowLink href="/works">{experiencePage.cta.toUpperCase()}</ArrowLink>
       </p>
     </div>
   );

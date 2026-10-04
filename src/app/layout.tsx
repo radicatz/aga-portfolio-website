@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Manrope } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import { Footer } from "@/components/layout/Footer";
 import { Providers } from "@/components/layout/Providers";
 import { WhatsAppFab } from "@/components/layout/WhatsAppFab";
@@ -9,16 +10,18 @@ import { projectsByCategory } from "@/content/projects";
 import { site } from "@/content/site";
 import "./globals.css";
 
-const instrument = Instrument_Serif({
-  variable: "--font-instrument",
-  subsets: ["latin"],
+// Display: Le Murmure (Jérémy Landes / Velvetyne, SIL OFL 1.1). Lisensi: assets/fonts/le-murmure/LICENSE.txt
+const display = localFont({
+  src: "../../assets/fonts/le-murmure/LeMurmure-Regular.woff2",
+  variable: "--font-display-face",
   weight: "400",
-  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const body = Space_Grotesk({
+  variable: "--font-body-face",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -51,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   }));
 
   return (
-    <html lang="id" suppressHydrationWarning className={`${instrument.variable} ${manrope.variable}`}>
+    <html lang="id" suppressHydrationWarning className={`${display.variable} ${body.variable}`}>
       <body className="flex min-h-dvh flex-col">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Providers>

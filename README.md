@@ -24,3 +24,9 @@ Foto Street berasal dari Instagram: `SCRAPECREATORS_API_KEY=... node scripts/fet
 - `docs/DESIGN-SYSTEM.md` — token, motion, inventaris komponen, alat verifikasi
 - `docs/PROGRESS.md` — progres, keputusan, daftar yang menunggu dari Aga
 - `CLAUDE.md` — aturan kerja untuk sesi Claude Code
+
+## Lisensi aset pihak ketiga
+
+- Ikon: [Guidance](https://github.com/webalys-hq/streamline-vectors) oleh Streamline, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Font display: Le Murmure oleh Jérémy Landes, [SIL OFL 1.1](assets/fonts/le-murmure/LICENSE.txt).
+- Font body: Space Grotesk (Google Fonts, SIL OFL 1.1).

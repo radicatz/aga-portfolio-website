@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
-import { HoverLine } from "@/components/ui/HoverLine";
+import { ArrowLink } from "@/components/ui/ArrowLink";
 import { servicesPage } from "@/content/pages";
 import { getProjectBySlug } from "@/content/projects";
 import { services, servicesIntro } from "@/content/services";
@@ -42,7 +42,7 @@ export default function ServicesPage() {
                 </div>
                 <p className="text-body mt-2 max-w-md text-muted">{s.description}</p>
                 <p className="text-label mt-5">
-                  <HoverLine href="/contact">{servicesPage.cta.toUpperCase()} →</HoverLine>
+                  <ArrowLink href="/contact">{servicesPage.cta.toUpperCase()}</ArrowLink>
                 </p>
               </Reveal>
             </li>

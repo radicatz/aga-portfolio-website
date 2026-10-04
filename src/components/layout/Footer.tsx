@@ -6,7 +6,7 @@ export function Footer() {
   const { contact } = site;
 
   return (
-    <footer className="border-t border-line/15">
+    <footer>
       <div className="container-site">
         <FooterCTA />
 
@@ -37,7 +37,15 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="border-t border-line/15 py-6 text-label text-muted">{site.footer.copyright}</p>
+        <div className="flex flex-col gap-2 border-t border-line/15 py-6 text-label text-muted md:flex-row md:justify-between">
+          <p>{site.footer.copyright}</p>
+          <p>
+            {site.footer.iconCredit.prefix}{" "}
+            <a href={site.footer.iconCredit.url} target="_blank" rel="noopener noreferrer" className="hover-line">
+              {site.footer.iconCredit.label}
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );

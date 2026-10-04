@@ -31,8 +31,8 @@ export interface ExperienceItem {
   company: string;
   role: string;
   description: string;
-  /** Slug proyek yang fotonya dipakai sebagai thumbnail hover. */
-  previewProject: string;
+  /** Slug proyek yang fotonya dipakai sebagai thumbnail hover (berganti saat kursor bergerak). */
+  previewProjects: string[];
   todo?: string;
 }
 

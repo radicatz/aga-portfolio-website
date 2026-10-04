@@ -18,11 +18,13 @@ Tailwind: `bg-bg text-fg text-muted border-line bg-surface`. Garis tipis memakai
 
 | Peran | Font | Kelas utilitas |
 |---|---|---|
-| Display (hero, judul halaman/proyek) | Instrument Serif | `text-display` |
-| Footer CTA | Instrument Serif | `text-cta` |
-| H2 / judul kartu | Instrument Serif | `text-title` |
-| Body | Manrope 400 | `text-body` |
-| Nav / label / meta | Manrope 500 uppercase | `text-label` |
+| Display (hero, judul halaman/proyek, wordmark, CTA footer, nilai kontak) | **Le Murmure** (SIL OFL 1.1, `assets/fonts/le-murmure/`) | `text-display`, `font-display` |
+| Judul panel (cerita proyek di lightbox) | Le Murmure | `text-heading` |
+| H2 / judul kartu | Le Murmure | `text-title` |
+| Body | **Space Grotesk** 400 (Google Fonts) | `text-body` |
+| Nav / label / meta | Space Grotesk 500 uppercase | `text-label` |
+
+Variabel font: `--font-display-face` / `--font-body-face` (next/font di `layout.tsx`) dipetakan ke `--font-display` / `--font-body` di `globals.css`. Murmure sangat condensed: `text-display` memakai line-height 0.92. Sumber lengkap font (spesimen, glyphs) ada di `.context/fonts/murmure-main/`.
 
 ## 3. Grid dan spacing
 Container maks 1440px (`.container-site`), gutter 24px desktop / 16px mobile. Ritme vertikal section: `py-section` (120 / 96 / 64px). Breakpoint: 810 (tablet), 1024 (nav desktop), 1200 (desktop).
@@ -43,13 +45,16 @@ Container maks 1440px (`.container-site`), gutter 24px desktop / 16px mobile. Ri
 
 | Elemen | Hover |
 |---|---|
-| Nav link, footer link, tab, tombol teks | `HoverLine`: garis 1px tumbuh dari kiri (`tween`) |
+| Nav link, footer link, tombol teks | `HoverLine` (`.hover-line`): garis 1px tumbuh dari kiri, di bawah teks (`tween`) |
+| Baris/tab yang punya separator `border-b` (tab /works, indeks kategori Home) | `.hover-rule`: garis tumbuh TEPAT di atas separator (`bottom: -1px`); elemen harus menempel ke tepi bawah kontainer bergaris |
+| Link dengan panah aksi (`ArrowLink`, Next) | panah `→` berputar ke `↗` (`.arrow-ne` / Motion `rotate -45`); panah navigasi kembali `←` tidak berputar |
+| Marquee Home | kecepatan melambat halus ke 25% saat hover (nilai referensi `tickerEffectHoverModifier: 25`); bisa di-drag kiri/kanan dengan inertia |
 | Kartu proyek | `scale 0.9` (`springCard`) |
-| Footer CTA | teks `scale 0.9` + panah `rotate 180` (`tween`) |
+| Footer CTA | teks `scale 0.9` + panah `→` berputar ke `↗` (`rotate -45`, `tween`) |
 | "Next >" / link kembali | `opacity 0.5` (`springQuick`) |
 | Kartu tempat kerja (About) | foto `scale 0.8, skewX -5, skewY -8` + label muncul (`springSoft`) |
 | Link teks | `--muted` → `--fg` |
-| WhatsApp FAB | `scale 0.9` (`springCard`) + panah ↗ berputar |
+| WhatsApp FAB / pil | `scale 0.9` (`springCard`) + panah `→` berputar ke `↗` (`rotate -45`) |
 
 ## 6. Inventaris komponen
 
@@ -58,25 +63,26 @@ Status: ✅ siap · 🚧 dalam proses · ⬜ belum dibuat. Semua komponen di baw
 | Komponen | Path | Fungsi |
 |---|---|---|
 | `HoverLine` | `src/components/ui/HoverLine.tsx` ✅ | Link (internal/eksternal) dengan garis bawah tumbuh; prop `active`. CSS di `globals.css` (`.hover-line`) |
+| `Icon` / `WhatsAppIcon` | `src/components/ui/Icon.tsx` ✅ | Ikon Guidance (path di `icons.ts`, dikunci per ARAH VISUAL karena nama aslinya terbalik) dan WhatsApp yang digambar ulang bergaya Guidance |
+| `ArrowLink` | `src/components/ui/ArrowLink.tsx` ✅ | `HoverLine` + ikon panah (`direction` right = berputar ↗, left = tetap) |
 | `WhatsAppPill` | `src/components/ui/WhatsAppPill.tsx` ✅ | Pil WhatsApp monokrom; dipakai FAB dan halaman Contact |
 | `SplitTextReveal` | `src/components/motion/SplitTextReveal.tsx` ✅ | Judul per huruf, blur-in saat mount. Prop `as: h1\|h2\|h3\|p\|span` |
 | `Reveal` | `src/components/motion/Reveal.tsx` ✅ | Muncul sekali saat masuk viewport |
 | `PageTransition` | `src/components/motion/PageTransition.tsx` ✅ | Fade antar halaman (dipakai `app/template.tsx`); hanya opacity |
 | `Providers` | `src/components/layout/Providers.tsx` ✅ | next-themes, MotionConfig reduced-motion, Lenis |
 | `Navbar` | `src/components/nav/Navbar.tsx` ✅ | Sticky, hide on scroll down. Menerima `categories` dari layout |
-| `WorksDropdown` | `src/components/nav/WorksDropdown.tsx` ✅ | Dropdown kategori (hover/fokus/keyboard) |
 | `MobileMenu` | `src/components/nav/MobileMenu.tsx` ✅ | Overlay layar penuh, stagger |
 | `ThemeToggle` | `src/components/nav/ThemeToggle.tsx` ✅ | LIGHT / DARK dengan View Transitions |
-| `Footer` / `FooterCTA` | `src/components/layout/` ✅ | Footer + CTA raksasa (scale 0.9, panah 180°); `data-hide-fab` |
+| `Footer` / `FooterCTA` | `src/components/layout/` ✅ | Footer + CTA (`text-display`, scale 0.9, panah ↗); atribusi ikon CC BY 4.0; `data-hide-fab` |
 | `WhatsAppFab` | `src/components/layout/WhatsAppFab.tsx` ✅ | Tombol sticky; tersembunyi bila `[data-hide-fab]` terlihat |
 | `ProjectCard` | `src/components/works/ProjectCard.tsx` ✅ | Kartu proyek, hover scale 0.9 (spring) |
-| `ProjectMarquee` | `src/components/works/ProjectMarquee.tsx` ✅ | Ticker Home 50/30 px/s; reduced-motion = carousel |
+| `ProjectMarquee` | `src/components/works/ProjectMarquee.tsx` ✅ | Ticker Home 50/30 px/s, hover 25%, drag + inertia; reduced-motion = carousel |
 | `CategoryTabs` | `src/components/works/CategoryTabs.tsx` ✅ | Tab filter sticky |
 | `WorksView` | `src/components/works/WorksView.tsx` ✅ | Judul + tab + intro + grid (/works dan /works/[category]) |
-| `Gallery` / `Lightbox` | `src/components/works/` ✅ | Galeri editorial (baris sesuai orientasi) + lightbox (Esc, panah, swipe, focus trap) |
+| `Gallery` / `Lightbox` | `src/components/works/` ✅ | Galeri editorial (pasangan foto tinggi sama via flex-grow = rasio, tanpa crop) + lightbox layar penuh gaya `.context/design/gallery.png` (foto + kontrol kiri, judul/cerita kanan, animasi geser+blur searah navigasi, Esc/panah/swipe, focus trap) |
 | `NextProject` | `src/components/works/NextProject.tsx` ✅ | Blok "Next >" (opacity 0.5) |
 | `WorkplaceCard` | `src/components/about/WorkplaceCard.tsx` ✅ | Kartu tempat kerja (scale 0.8 + skew) |
-| `ExperienceList` | `src/components/experience/ExperienceList.tsx` ✅ | Baris pengalaman + thumbnail ikut kursor |
+| `ExperienceList` | `src/components/experience/ExperienceList.tsx` ✅ | Baris pengalaman; thumbnail ikut kursor, berganti tiap 80px gerak dengan sudut tetap berbeda per foto |
 | `CopyButton` | `src/components/contact/CopyButton.tsx` ✅ | Salin email |
 
 ## 7. Alat verifikasi (`scripts/`)
@@ -89,3 +95,7 @@ Status: ✅ siap · 🚧 dalam proses · ⬜ belum dibuat. Semua komponen di baw
 | `audit-weight.mjs` | Total byte dan gambar terbesar per rute (anggaran 500 KB) |
 
 Semua butuh server berjalan: `npm run build && npx next start -p 3100`. Di Git Bash awali dengan `MSYS_NO_PATHCONV=1` bila argumen rute diawali `/`.
+
+## 8. Ikon dan lisensi
+
+Ikon panah dan telepon memakai set **Guidance** oleh Streamline (CC BY 4.0). Atribusi wajib ada di footer (`site.footer.iconCredit`) dan README. Guidance tidak punya ikon WhatsApp, jadi `WhatsAppIcon` digambar sendiri bergaya Guidance (gelembung + gagang telepon Guidance yang dipusatkan). Font Le Murmure berlisensi SIL OFL 1.1 (`assets/fonts/le-murmure/LICENSE.txt`).

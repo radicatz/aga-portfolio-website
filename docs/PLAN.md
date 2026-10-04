@@ -3,6 +3,8 @@
 > Dokumen perencanaan lengkap. Saat implementasi dimulai, salin dokumen ini ke `docs/PLAN.md` di repo.
 > Referensi: https://lundanistudio.framer.website/ · Instagram: @agadinata_ · Sumber: `.context/Portofolio/Aga Kharta Dinata Porto.pdf`, `.context/Portofolio/Foto/*`
 
+> **Revisi 1 (2026-10-05):** dokumen ini adalah rencana awal. Perubahan setelahnya (font Le Murmure + Space Grotesk, ikon Guidance, dropdown Works dihapus, panah hover ↗, marquee hover 25% + drag, lightbox baru, Experience multi-foto, dll.) dicatat di `docs/PROGRESS.md` (Log keputusan) dan `docs/DESIGN-SYSTEM.md`. Di mana keduanya berbeda dengan dokumen ini, ikuti DESIGN-SYSTEM dan PROGRESS.
+
 > **Mode kerja:** user memilih **auto mode** untuk implementasi. Urutan eksekusi: F0 (scaffold + `CLAUDE.md`, `docs/DESIGN-SYSTEM.md`, `docs/PROGRESS.md`, 4 skill proyek, lihat §8b) → F1 → … → F7. `docs/PROGRESS.md` diperbarui di akhir tiap fase.
 
 ---

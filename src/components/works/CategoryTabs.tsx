@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { HoverLine } from "@/components/ui/HoverLine";
+import Link from "next/link";
 import { works } from "@/content/pages";
 
 type Props = { categories: { slug: string; label: string }[] };
@@ -16,12 +16,19 @@ export function CategoryTabs({ categories }: Props) {
       aria-label="Kategori karya"
       className="sticky top-16 z-20 -mx-4 overflow-x-auto bg-bg/85 px-4 backdrop-blur-md md:-mx-6 md:px-6"
     >
-      <ul className="flex min-w-max gap-8 border-b border-line/15 py-4 text-label">
+      {/* Tab menempel ke tepi bawah ul; .hover-rule menumpuk garis hover/aktif tepat di atas separator border-b. */}
+      <ul className="flex min-w-max gap-8 border-b border-line/15 text-label">
         {tabs.map((t) => (
           <li key={t.href}>
-            <HoverLine href={t.href} scroll={false} active={pathname === t.href} aria-current={pathname === t.href ? "page" : undefined}>
+            <Link
+              href={t.href}
+              scroll={false}
+              className="hover-rule block py-4"
+              data-active={pathname === t.href ? "true" : undefined}
+              aria-current={pathname === t.href ? "page" : undefined}
+            >
               {t.label}
-            </HoverLine>
+            </Link>
           </li>
         ))}
       </ul>
