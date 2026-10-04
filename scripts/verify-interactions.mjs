@@ -266,6 +266,36 @@ const browser = await chromium.launch();
   const text = await dialog.textContent();
   check("lightbox: judul + cerita proyek di panel", text.includes("Omakase & Sake") && text.includes("Seri untuk sebuah restoran Jepang"));
   check("counter 01 / 16", text.includes("01 / 16"));
+
+  // Zoom detail di slideshow: hover mouse memperbesar foto, titik zoom mengikuti kursor
+  const stage = dialog.locator("[data-zoom-stage]");
+  const sb = await stage.boundingBox();
+  const zoomLayer = () => dialog.locator("[data-zoom-layer]").last();
+  const zoomScale = () =>
+    zoomLayer().evaluate((el) => {
+      const m = getComputedStyle(el).transform;
+      return m === "none" ? 1 : new DOMMatrix(m).a;
+    });
+  await page.mouse.move(5, 5);
+  await sleep(2200); // kursor sempat berada di atas panggung saat lightbox terbuka; beri waktu spring kembali ke 1x
+  check("slideshow zoom: normal 1x sebelum hover", Math.abs((await zoomScale()) - 1) < 0.02);
+  await page.mouse.move(sb.x + sb.width * 0.4, sb.y + sb.height * 0.4);
+  await sleep(2000); // spring zoom sengaja lembut, beri waktu menetap
+  const zIn = await zoomScale();
+  check("slideshow zoom: hover memperbesar foto 4x", Math.abs(zIn - 4) < 0.15, `${zIn.toFixed(2)}x`);
+  const o1 = await zoomLayer().evaluate((el) => getComputedStyle(el).transformOrigin);
+  await page.mouse.move(sb.x + sb.width * 0.6, sb.y + sb.height * 0.6);
+  await sleep(120);
+  const oMid = await zoomLayer().evaluate((el) => getComputedStyle(el).transformOrigin);
+  await sleep(1500);
+  const o2 = await zoomLayer().evaluate((el) => getComputedStyle(el).transformOrigin);
+  check("slideshow zoom: titik zoom mengikuti kursor", o1 !== o2, `${o1} -> ${o2}`);
+  check("slideshow zoom: titik zoom meluncur halus (tidak melompat)", oMid !== o1 && oMid !== o2, `tengah ${oMid}`);
+  check("slideshow zoom: memuat resolusi tinggi saat hover", (await dialog.locator("img").last().getAttribute("sizes")) === "2400px");
+  await page.mouse.move(5, 5);
+  await sleep(2000);
+  check("slideshow zoom: kembali 1x saat kursor keluar", Math.abs((await zoomScale()) - 1) < 0.05, `${(await zoomScale()).toFixed(2)}x`);
+
   const srcBefore = await dialog.locator("img").first().getAttribute("src");
   await dialog.getByRole("button", { name: "SELANJUTNYA" }).click();
   await sleep(150);
@@ -292,12 +322,14 @@ const browser = await chromium.launch();
     const cs = getComputedStyle(n);
     return {
       prevText: prev.textContent, nextText: next.textContent, prevHref: prev.getAttribute("href"), nextHref: next.getAttribute("href"),
-      borders: [cs.borderTopWidth, cs.borderBottomWidth], prevAlign: getComputedStyle(prev).textAlign, nextAlign: getComputedStyle(next).textAlign,
+      borders: [cs.borderTopWidth, cs.borderBottomWidth], wrapBorder: getComputedStyle(n.parentElement).borderBottomWidth,
+      wrapGap: document.querySelector("footer").getBoundingClientRect().top - n.parentElement.getBoundingClientRect().bottom, prevAlign: getComputedStyle(prev).textAlign, nextAlign: getComputedStyle(next).textAlign,
     };
   });
   check("project nav: PREVIOUS PROJECT kiri + judul", /Previous project/i.test(pn.prevText) && pn.prevText.includes("Cellar Notes") === false && pn.prevAlign === "left", pn.prevText.slice(0, 40));
   check("project nav: NEXT PROJECT kanan + judul", /Next project/i.test(pn.nextText) && pn.nextText.includes("Cellar Notes") && pn.nextAlign === "right", pn.nextText.slice(0, 40));
-  check("project nav: garis atas dan bawah", pn.borders[0] === "1px" && pn.borders[1] === "1px", pn.borders.join(" / "));
+  check("project nav: strip tanpa garis sendiri", pn.borders[0] === "0px" && pn.borders[1] === "0px", pn.borders.join(" / "));
+  check("project nav: pemisah abu-abu tepat di atas CTA footer", pn.wrapBorder === "1px" && Math.abs(pn.wrapGap) < 2, `border ${pn.wrapBorder}, jarak ke footer ${pn.wrapGap.toFixed(1)}px`);
   check("project nav: tanpa link 'Kembali ke'", (await page.getByRole("link", { name: /Kembali ke/i }).count()) === 0);
   // Hover: panah previous -> ↖ (+45°), panah next -> ↗ (-45°)
   const prevLink = pnav.getByRole("link", { name: /Previous project/i });
@@ -313,6 +345,14 @@ const browser = await chromium.launch();
   await pnav.getByRole("link", { name: /Next project/i }).click();
   await page.waitForURL("**/works/food/cellar-notes");
   check("project nav: klik Next -> proyek berikutnya", page.url().endsWith("/works/food/cellar-notes"));
+
+  // Kategori dengan dua proyek (documentation): previous = next, jadi hanya "Next project" yang tampil
+  await page.goto(base + "/works/documentation/pelatihan-fotografi", { waitUntil: "networkidle" });
+  await sleep(1200);
+  const solo = page.locator("nav[aria-label='Navigasi proyek']");
+  check("project nav (2 proyek): hanya tombol Next project", (await solo.getByRole("link", { name: /Next project/i }).count()) === 1 && (await solo.getByRole("link", { name: /Previous project/i }).count()) === 0);
+  const soloRight = await solo.getByRole("link", { name: /Next project/i }).evaluate((a) => Math.abs(a.getBoundingClientRect().right - a.closest("nav").getBoundingClientRect().right) < 2);
+  check("project nav (2 proyek): tombol Next tetap di kanan", soloRight);
 
   // Experience: foto berganti saat kursor bergerak, tiap foto beda sudut
   await page.goto(base + "/experience", { waitUntil: "networkidle" });

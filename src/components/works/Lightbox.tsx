@@ -1,8 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import Image, { type StaticImageData } from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { lightbox } from "@/content/pages";
 import { springText } from "@/lib/motion";
@@ -25,17 +25,59 @@ const slide = {
   exit: (dir: number) => ({ x: `${dir * -6}%`, opacity: 0, filter: "blur(8px)" }),
 };
 
+/** Perbesaran saat hover (mouse). Foto sumber maks 2400px: 4x paling tajam pada foto portrait, foto landscape lebar agak lunak. */
+const ZOOM = 4;
+
+// Zoom dibuat halus: skala berpegas lembut (tanpa pantulan) dan titik zoom meluncur mengikuti kursor, tidak melompat.
+const SCALE_SPRING = { stiffness: 110, damping: 24 };
+const ORIGIN_SPRING = { stiffness: 90, damping: 22 };
+
 const pad = (n: number) => String(n).padStart(2, "0");
+
+// Zoom hover hanya untuk perangkat dengan mouse; layar sentuh tetap memakai swipe untuk berpindah foto.
+const FINE_POINTER = "(hover: hover) and (pointer: fine)";
+const subscribeFinePointer = (cb: () => void) => {
+  const m = window.matchMedia(FINE_POINTER);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+};
+const useFinePointer = () =>
+  useSyncExternalStore(subscribeFinePointer, () => window.matchMedia(FINE_POINTER).matches, () => false);
 
 /**
  * Lightbox layar penuh (mengikuti .context/design/gallery.png): kiri foto + kontrol, kanan judul dan cerita proyek.
  * Esc menutup, panah/swipe berpindah dengan animasi geser, fokus terkunci dan dikembalikan saat ditutup.
+ * Hover mouse pada foto memperbesarnya (zoom detail seperti halaman produk): titik zoom mengikuti kursor dan
+ * versi resolusi tinggi dimuat saat hover pertama. Reduced-motion menonaktifkan zoom.
  */
 export function Lightbox({ images, index, onChange, title, story }: Props) {
   const open = index !== null;
   const [dir, setDir] = useState(1);
+  const [hires, setHires] = useState(false);
   const dialog = useRef<HTMLDivElement>(null);
   const opener = useRef<Element | null>(null);
+
+  const reduced = useReducedMotion();
+  const finePointer = useFinePointer();
+  const canZoom = finePointer && !reduced;
+  const targetX = useMotionValue(0.5);
+  const targetY = useMotionValue(0.5);
+  const originX = useSpring(targetX, ORIGIN_SPRING);
+  const originY = useSpring(targetY, ORIGIN_SPRING);
+  const scale = useSpring(1, SCALE_SPRING);
+
+  /** Perbarui titik zoom dari posisi kursor. `snap`: lompat langsung (saat kursor masuk) agar zoom mulai tepat di kursor. */
+  const track = (e: PointerEvent<HTMLDivElement>, snap = false) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    targetX.set(x);
+    targetY.set(y);
+    if (snap) {
+      originX.jump(x);
+      originY.jump(y);
+    }
+  };
 
   const go = (delta: number) => {
     if (index === null) return;
@@ -50,9 +92,10 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
     dialog.current?.querySelector<HTMLElement>("button")?.focus();
     return () => {
       document.body.style.overflow = "";
+      scale.jump(1); // buka berikutnya selalu mulai tanpa zoom
       (opener.current as HTMLElement | null)?.focus?.();
     };
-  }, [open]);
+  }, [open, scale]);
 
   useEffect(() => {
     if (!open) return;
@@ -107,17 +150,29 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
             </div>
 
             <motion.div
-              className="relative h-[62dvh] cursor-grab active:cursor-grabbing lg:h-auto lg:min-h-0 lg:flex-1"
+              data-zoom-stage
+              className={`relative h-[62dvh] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1 ${
+                canZoom ? "cursor-zoom-in" : "cursor-grab active:cursor-grabbing"
+              }`}
               initial={{ scale: 0.96 }}
               animate={{ scale: 1 }}
               transition={springText}
-              drag="x"
+              // Swipe untuk berpindah foto hanya di layar sentuh; dengan mouse, hover dipakai untuk zoom.
+              drag={canZoom ? false : "x"}
               dragSnapToOrigin
               dragElastic={0.2}
               onDragEnd={(_, info) => {
                 if (info.offset.x < -80) go(1);
                 else if (info.offset.x > 80) go(-1);
               }}
+              onPointerEnter={(e) => {
+                if (!canZoom || e.pointerType !== "mouse") return;
+                track(e, true);
+                setHires(true);
+                scale.set(ZOOM);
+              }}
+              onPointerMove={(e) => canZoom && e.pointerType === "mouse" && track(e)}
+              onPointerLeave={() => scale.set(1)}
             >
               <AnimatePresence initial={false} custom={dir} mode="popLayout">
                 <motion.div
@@ -130,15 +185,19 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
                   transition={springText}
                   className="absolute inset-0"
                 >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    sizes="(min-width: 1024px) 66vw, 100vw"
-                    className="object-contain p-2 md:p-6"
-                    draggable={false}
-                    priority
-                  />
+                  {/* Lapisan zoom: terpisah dari animasi geser agar keduanya tidak saling menimpa */}
+                  <motion.div data-zoom-layer className="absolute inset-0" style={{ originX, originY, scale }}>
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      fill
+                      // Setelah hover pertama, minta kandidat resolusi tertinggi agar detail tetap tajam saat diperbesar.
+                      sizes={hires ? "2400px" : "(min-width: 1024px) 66vw, 100vw"}
+                      className="object-contain p-2 md:p-6"
+                      draggable={false}
+                      priority
+                    />
+                  </motion.div>
                 </motion.div>
               </AnimatePresence>
             </motion.div>

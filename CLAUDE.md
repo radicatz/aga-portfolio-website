@@ -28,7 +28,7 @@ Sesi baru akan meminta persetujuan server ini saat pertama kali dimuat. Opsional
 ## Aturan wajib
 1. **Cek inventaris di `docs/DESIGN-SYSTEM.md` sebelum membuat komponen baru.** Pakai atau perluas yang ada. Komponen baru wajib didaftarkan di inventaris.
 2. **Tanpa nilai hardcode**: warna lewat CSS variable (`--bg --fg --muted --line --surface`), transisi lewat `src/lib/motion.ts`. Jangan membuat ease/spring baru tanpa menambahkannya ke `lib/motion.ts` dan DESIGN-SYSTEM.
-3. **Hover selalu menahan diri**: scale ≤ 1, garis bawah tumbuh, atau opacity turun. Nilai persis ada di `docs/PLAN.md` §1.5. Jangan zoom-in, bayangan, atau perubahan warna mencolok.
+3. **Hover selalu menahan diri**: scale ≤ 1, garis bawah tumbuh, atau opacity turun. Nilai persis ada di `docs/PLAN.md` §1.5. Jangan zoom-in, bayangan, atau perubahan warna mencolok. **Satu pengecualian yang diminta user:** zoom 4x foto di slideshow/lightbox (hanya mouse).
 4. **Copy hanya di `src/content/*`.** Komponen tidak boleh berisi copy hardcode, kecuali label UI pendek berbahasa Inggris (WORKS, ABOUT, Client, Year, Location).
 5. Setiap fitur harus jalan di **mode terang dan gelap**, di **390 / 810 / 1440px**, dengan `prefers-reduced-motion`, dan bisa dipakai lewat keyboard.
 6. Tombol WhatsApp memakai gaya situs (monokrom `--fg`/`--bg`). **Jangan hijau WhatsApp.**
