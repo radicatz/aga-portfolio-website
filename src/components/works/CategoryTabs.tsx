@@ -14,7 +14,7 @@ export function CategoryTabs({ categories }: Props) {
   return (
     <nav
       aria-label="Kategori karya"
-      className="sticky top-16 z-20 -mx-4 overflow-x-auto bg-bg/85 px-4 backdrop-blur-md md:-mx-6 md:px-6"
+      className="sticky top-16 z-20 -mx-4 overflow-x-auto overflow-y-hidden bg-bg/85 px-4 backdrop-blur-md [scrollbar-width:none] md:-mx-6 md:px-6 [&::-webkit-scrollbar]:hidden"
     >
       {/* Tab menempel ke tepi bawah ul; .hover-rule menumpuk garis hover/aktif tepat di atas separator border-b. */}
       <ul className="flex min-w-max gap-8 border-b border-line/15 text-label">
@@ -23,7 +23,7 @@ export function CategoryTabs({ categories }: Props) {
             <Link
               href={t.href}
               scroll={false}
-              className="hover-rule block py-4"
+              className="hover-rule block py-4 focus-visible:outline-offset-[-2px]"
               data-active={pathname === t.href ? "true" : undefined}
               aria-current={pathname === t.href ? "page" : undefined}
             >

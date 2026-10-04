@@ -80,7 +80,7 @@ Status: ✅ siap · 🚧 dalam proses · ⬜ belum dibuat. Semua komponen di baw
 | `CategoryTabs` | `src/components/works/CategoryTabs.tsx` ✅ | Tab filter sticky |
 | `WorksView` | `src/components/works/WorksView.tsx` ✅ | Judul + tab + intro + grid (/works dan /works/[category]) |
 | `Gallery` / `Lightbox` | `src/components/works/` ✅ | Galeri editorial (pasangan foto tinggi sama via flex-grow = rasio, tanpa crop) + lightbox layar penuh gaya `.context/design/gallery.png` (foto + kontrol kiri, judul/cerita kanan, animasi geser+blur searah navigasi, Esc/panah/swipe, focus trap) |
-| `NextProject` | `src/components/works/NextProject.tsx` ✅ | Blok "Next >" (opacity 0.5) |
+| `ProjectNav` | `src/components/works/ProjectNav.tsx` ✅ | Navigasi antarproyek: strip bergaris atas-bawah, "← PREVIOUS PROJECT" + judul (kiri) dan "NEXT PROJECT →" + judul (kanan); hover opacity 0.5, panah next berputar ↗ |
 | `WorkplaceCard` | `src/components/about/WorkplaceCard.tsx` ✅ | Kartu tempat kerja (scale 0.8 + skew) |
 | `ExperienceList` | `src/components/experience/ExperienceList.tsx` ✅ | Baris pengalaman; thumbnail ikut kursor, berganti tiap 80px gerak dengan sudut tetap berbeda per foto |
 | `CopyButton` | `src/components/contact/CopyButton.tsx` ✅ | Salin email |

@@ -5,10 +5,10 @@ import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { HoverLine } from "@/components/ui/HoverLine";
 import { Gallery } from "@/components/works/Gallery";
-import { NextProject } from "@/components/works/NextProject";
+import { ProjectNav } from "@/components/works/ProjectNav";
 import { categoryBySlug } from "@/content/categories";
 import { works } from "@/content/pages";
-import { allProjects, getProject, nextProject, projectsByCategory } from "@/content/projects";
+import { allProjects, getProject, nextProject, previousProject, projectsByCategory } from "@/content/projects";
 
 export const dynamicParams = false;
 
@@ -33,7 +33,9 @@ export default async function ProjectPage(props: PageProps<"/works/[category]/[s
   const cat = categoryBySlug(category);
   if (!project || !cat) notFound();
 
-  const next = projectsByCategory(project.category).length > 1 ? nextProject(project) : null;
+  const hasSiblings = projectsByCategory(project.category).length > 1;
+  const next = hasSiblings ? nextProject(project) : null;
+  const previous = hasSiblings ? previousProject(project) : null;
   const meta = [
     { label: "Client", value: project.client },
     { label: "Year", value: project.year },
@@ -77,7 +79,12 @@ export default async function ProjectPage(props: PageProps<"/works/[category]/[s
         </ArrowLink>
       </div>
 
-      {next && <NextProject href={`/works/${next.category}/${next.slug}`} title={next.title} />}
+      {next && previous && (
+        <ProjectNav
+          previous={{ href: `/works/${previous.category}/${previous.slug}`, title: previous.title }}
+          next={{ href: `/works/${next.category}/${next.slug}`, title: next.title }}
+        />
+      )}
     </article>
   );
 }

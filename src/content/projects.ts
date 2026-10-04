@@ -276,6 +276,13 @@ export const nextProject = (project: ProjectWithImages) => {
   return siblings[(i + 1) % siblings.length];
 };
 
+/** Proyek sebelumnya dalam kategori yang sama (berputar). */
+export const previousProject = (project: ProjectWithImages) => {
+  const siblings = projectsByCategory(project.category);
+  const i = siblings.findIndex((p) => p.slug === project.slug);
+  return siblings[(i - 1 + siblings.length) % siblings.length];
+};
+
 /** Data minimal untuk kartu proyek (marquee Home dan grid /works). */
 export const toCardData = (p: ProjectWithImages) => ({
   slug: p.slug,

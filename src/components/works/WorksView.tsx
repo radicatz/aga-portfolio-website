@@ -17,7 +17,7 @@ export function WorksView({ category }: { category?: CategorySlug }) {
 
   return (
     <div className="container-site pt-12 md:pt-20">
-      <SplitTextReveal text={current ? current.title : works.heading} className="text-display max-w-[16ch]" />
+      <SplitTextReveal text={current ? current.title : works.heading} className="text-display" />
 
       <div className="mt-10 md:mt-14">
         <CategoryTabs categories={categories.map(({ slug, label }) => ({ slug, label }))} />

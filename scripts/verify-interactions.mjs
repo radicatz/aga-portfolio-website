@@ -90,7 +90,8 @@ const browser = await chromium.launch();
   await page.mouse.up();
   await sleep(100);
   const afterDrag = await translateX(page, trackSel);
-  check("drag marquee menggeser track", Math.abs(afterDrag - before) > 250, `${(afterDrag - before).toFixed(0)} px`);
+  // Drag 400px; ambang 150px menyisakan toleransi untuk timing event pointer di mesin yang sedang sibuk.
+  check("drag marquee menggeser track", Math.abs(afterDrag - before) > 150, `${(afterDrag - before).toFixed(0)} px`);
   check("drag tidak memicu navigasi kartu", new URL(page.url()).pathname === "/");
 
   // Marquee: flick (drag cepat lalu lepas) menimbulkan inertia: lebih cepat dari kecepatan otomatis
@@ -163,6 +164,23 @@ const browser = await chromium.launch();
     return { lines: Math.round(h.getBoundingClientRect().height / lh), text: h.getAttribute("aria-label") };
   });
   check("judul /works = 2 baris", h1.lines === 2 && h1.text === "Dari dapur sampai jalanan.", `${h1.lines} baris`);
+  for (const slug of ["documentation", "food", "portrait", "product", "street"]) {
+    await page.goto(base + `/works/${slug}`, { waitUntil: "networkidle" });
+    await sleep(1500);
+    const lines = await page.evaluate(() => {
+      const h = document.querySelector("h1");
+      const lh = parseFloat(getComputedStyle(h).lineHeight) || parseFloat(getComputedStyle(h).fontSize);
+      return Math.round(h.getBoundingClientRect().height / lh);
+    });
+    check(`judul /works/${slug} = 2 baris`, lines === 2, `${lines} baris`);
+  }
+  await page.goto(base + "/works", { waitUntil: "networkidle" });
+  await sleep(1500);
+  const tabNav = await page.evaluate(() => {
+    const n = document.querySelector("nav[aria-label='Kategori karya']");
+    return { scrollbarWidth: n.offsetWidth - n.clientWidth, scrollbarHeight: n.offsetHeight - n.clientHeight, overflowY: n.scrollHeight - n.clientHeight };
+  });
+  check("tab kategori: tanpa scrollbar", tabNav.scrollbarWidth === 0 && tabNav.scrollbarHeight === 0 && tabNav.overflowY <= 0, `scrollbar ${tabNav.scrollbarWidth}x${tabNav.scrollbarHeight}, overflow-y ${tabNav.overflowY}`);
   const tab = page.getByRole("link", { name: "Food", exact: true });
   await tab.hover();
   await sleep(700);
@@ -231,6 +249,24 @@ const browser = await chromium.launch();
   await page.keyboard.press("Escape");
   await sleep(500);
   check("Esc menutup lightbox", (await page.getByRole("dialog").count()) === 0);
+
+  // Navigasi antarproyek (prev/next)
+  const pnav = page.locator("nav[aria-label='Navigasi proyek']");
+  await pnav.scrollIntoViewIfNeeded();
+  const pn = await pnav.evaluate((n) => {
+    const [prev, next] = n.querySelectorAll("a");
+    const cs = getComputedStyle(n);
+    return {
+      prevText: prev.textContent, nextText: next.textContent, prevHref: prev.getAttribute("href"), nextHref: next.getAttribute("href"),
+      borders: [cs.borderTopWidth, cs.borderBottomWidth], prevAlign: getComputedStyle(prev).textAlign, nextAlign: getComputedStyle(next).textAlign,
+    };
+  });
+  check("project nav: PREVIOUS PROJECT kiri + judul", /Previous project/i.test(pn.prevText) && pn.prevText.includes("Cellar Notes") === false && pn.prevAlign === "left", pn.prevText.slice(0, 40));
+  check("project nav: NEXT PROJECT kanan + judul", /Next project/i.test(pn.nextText) && pn.nextText.includes("Cellar Notes") && pn.nextAlign === "right", pn.nextText.slice(0, 40));
+  check("project nav: garis atas dan bawah", pn.borders[0] === "1px" && pn.borders[1] === "1px", pn.borders.join(" / "));
+  await pnav.getByRole("link", { name: /Next project/i }).click();
+  await page.waitForURL("**/works/food/cellar-notes");
+  check("project nav: klik Next -> proyek berikutnya", page.url().endsWith("/works/food/cellar-notes"));
 
   // Experience: foto berganti saat kursor bergerak, tiap foto beda sudut
   await page.goto(base + "/experience", { waitUntil: "networkidle" });

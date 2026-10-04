@@ -10,13 +10,14 @@ export const home = {
 
 export const works = {
   title: "Karya",
-  /** Judul tampilan /works (2 baris, sejajar dengan judul kategori). */
-  heading: "Dari dapur sampai jalanan.",
+  /** Judul tampilan /works: dua baris paksa (newline), sejajar dengan judul kategori. */
+  heading: "Dari dapur\nsampai jalanan.",
   allLabel: "Semua",
   intro:
     "Lima ruang kerja, satu cara melihat. Setiap proyek dimulai dari hal yang sama: memperhatikan cahaya sebelum menekan rana.",
   backLabel: "Kembali ke",
-  nextLabel: "Next",
+  previousLabel: "Previous project",
+  nextLabel: "Next project",
 };
 
 export const lightbox = {
