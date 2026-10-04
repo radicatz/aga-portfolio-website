@@ -23,7 +23,7 @@ export default function HomePage() {
         <ProjectMarquee items={cards} />
       </section>
 
-      <section className="container-site pb-section">
+      <section className="container-site">
         <Reveal>
           <p className="text-label text-muted">{home.categoriesLabel}</p>
           <ul className="mt-6 border-t border-line/15">

@@ -24,7 +24,7 @@ export default function AboutPage() {
       <div className="mt-12 grid gap-10 md:mt-20 md:grid-cols-12">
         <Reveal className="space-y-6 md:col-span-7 md:col-start-6">
           {about.paragraphs.map((p) => (
-            <p key={p} className="text-body">
+            <p key={p} className="text-body text-muted">
               {p}
             </p>
           ))}

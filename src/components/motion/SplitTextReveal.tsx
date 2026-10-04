@@ -43,7 +43,8 @@ export function SplitTextReveal({ text, as: Tag = "h1", className, delay = 0.05,
                     {char}
                   </motion.span>
                 ))}
-                {wi < words.length - 1 ? " " : null}
+                {/* NBSP: spasi biasa di ujung inline-block (nowrap) akan dilipat browser, sehingga kata menempel */}
+                {wi < words.length - 1 ? "\u00A0" : null}
               </span>
             ))}
           </span>

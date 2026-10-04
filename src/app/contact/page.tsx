@@ -65,8 +65,6 @@ export default function ContactPage() {
           </dl>
         </Reveal>
       </div>
-
-      <div className="pb-section" />
     </div>
   );
 }

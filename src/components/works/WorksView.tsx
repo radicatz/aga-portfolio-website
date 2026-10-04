@@ -33,7 +33,7 @@ export function WorksView({ category }: { category?: CategorySlug }) {
         </div>
       </Reveal>
 
-      <ul className="mt-16 grid gap-x-6 gap-y-14 pb-section md:mt-24 md:grid-cols-2">
+      <ul className="mt-16 grid gap-x-6 gap-y-14 md:mt-24 md:grid-cols-2">
         {list.map((p, i) => (
           <li key={p.slug} className={i % 2 === 1 ? "md:mt-24" : undefined}>
             <Reveal delay={(i % 2) * 0.1}>

@@ -33,7 +33,8 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  // 404 yang disengaja (halaman /tidak-ada untuk menguji judul 404) tidak dihitung sebagai error.
+  page.on("console", (m) => m.type() === "error" && !(m.location().url ?? "").endsWith("/tidak-ada") && errors.push(m.text()));
 
   await page.goto(base + "/", { waitUntil: "networkidle" });
   check("tema default = light", (await page.getAttribute("html", "data-theme")) === "light");
@@ -62,6 +63,14 @@ const browser = await chromium.launch();
   await sleep(500);
   check("tidak ada dropdown Works", (await page.locator("header a[href^='/works/']").count()) === 0);
   await page.mouse.move(700, 120);
+
+  // Jarak marquee -> label "Jelajahi per kategori"
+  const gap = await page.evaluate(() => {
+    const track = document.querySelector("section[aria-label='Karya pilihan'] ul");
+    const label = [...document.querySelectorAll("p")].find((p) => p.textContent.trim().toLowerCase() === "jelajahi per kategori");
+    return label.getBoundingClientRect().top - track.getBoundingClientRect().bottom;
+  });
+  check("jarak marquee -> 'Jelajahi per kategori' >= 100px", gap >= 100, `${gap.toFixed(0)}px`);
 
   // Marquee: kecepatan normal vs hover (25%)
   const trackSel = "section[aria-label='Karya pilihan'] ul";
@@ -154,6 +163,31 @@ const browser = await chromium.launch();
   await sleep(900);
   const arrowRot = await rotationDeg(cta.locator("svg").first().locator(".."));
   check("panah Footer CTA berputar ke ↗ (-45°)", Math.abs(arrowRot + 45) < 2, `${arrowRot}°`);
+
+  // Semua judul (h1) harus tampil dengan spasi antarkata (regresi: "TentangAga")
+  const headingRoutes = ["/", "/works", "/works/documentation", "/works/food", "/works/portrait", "/works/product", "/works/street", "/works/food/omakase-sake", "/works/street/ritme-malam-kota", "/about", "/experience", "/services", "/contact", "/tidak-ada"];
+  const brokenHeadings = [];
+  for (const route of headingRoutes) {
+    await page.goto(base + route, { waitUntil: "networkidle" });
+    await sleep(1600);
+    const h = await page.evaluate(() => {
+      const el = document.querySelector("h1");
+      const rendered = el.innerText.replace(/[\s ]+/g, " ").trim();
+      return { rendered, expected: el.getAttribute("aria-label") };
+    });
+    if (h.rendered !== h.expected) brokenHeadings.push(`${route}: "${h.rendered}" != "${h.expected}"`);
+  }
+  check(`judul: spasi antarkata utuh di ${headingRoutes.length} halaman`, brokenHeadings.length === 0, brokenHeadings.slice(0, 2).join(" | "));
+
+  // About: paragraf isi berwarna abu-abu (muted) seperti halaman lain
+  await page.goto(base + "/about", { waitUntil: "networkidle" });
+  await sleep(1600);
+  const aboutColors = await page.evaluate(() => {
+    const body = getComputedStyle(document.querySelector("p.text-body")).color;
+    const muted = getComputedStyle(document.querySelector("p.text-label.text-muted")).color;
+    return { body, muted };
+  });
+  check("About: paragraf isi abu-abu (muted)", aboutColors.body === aboutColors.muted, `${aboutColors.body}`);
 
   // Works: judul 2 baris + tab sejajar separator
   await page.goto(base + "/works", { waitUntil: "networkidle" });

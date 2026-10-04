@@ -98,6 +98,16 @@ body {
   }
 }
 
+@utility pb-section {
+  padding-bottom: 64px;
+  @media (min-width: 810px) {
+    padding-bottom: 96px;
+  }
+  @media (min-width: 1200px) {
+    padding-bottom: 120px;
+  }
+}
+
 @utility py-section {
   padding-block: 64px;
   @media (min-width: 810px) {
