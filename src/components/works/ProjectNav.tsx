@@ -10,8 +10,8 @@ type Target = { href: string; title: string };
 
 /**
  * Navigasi antarproyek: strip bergaris atas-bawah, kiri "← PREVIOUS PROJECT" + judul, kanan "NEXT PROJECT →" + judul.
- * Hover mengikuti referensi: opacity 0.5 (spring 0.4s). Panah "next" berputar ke ↗ (aturan panah aksi);
- * panah "previous" (navigasi mundur) tetap.
+ * Hover mengikuti referensi: opacity 0.5 (spring 0.4s). Panah berputar 45° ke arah atas sisinya:
+ * "next" dari → ke ↗ (-45°), "previous" dari ← ke ↖ (+45°).
  */
 export function ProjectNav({ previous, next }: { previous: Target; next: Target }) {
   return (
@@ -26,7 +26,9 @@ export function ProjectNav({ previous, next }: { previous: Target; next: Target 
           className="block"
         >
           <span className="text-label flex items-center gap-2 text-muted">
-            <Icon name="arrow-left" className="size-4" />
+            <motion.span variants={{ rest: { rotate: 0 }, hover: { rotate: 45 } }} transition={tween} className="block">
+              <Icon name="arrow-left" className="size-4" />
+            </motion.span>
             {works.previousLabel}
           </span>
           <span className="text-heading mt-2 block">{previous.title}</span>

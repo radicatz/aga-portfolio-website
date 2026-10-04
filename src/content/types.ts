@@ -29,6 +29,8 @@ export interface Project {
 export interface ExperienceItem {
   period: string;
   company: string;
+  /** Nama untuk tampilan besar di halaman Experience, dengan pemisah baris paksa (newline) agar selalu dua baris. */
+  displayName: string;
   role: string;
   description: string;
   /** Slug proyek yang fotonya dipakai sebagai thumbnail hover (berganti saat kursor bergerak). */

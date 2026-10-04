@@ -298,6 +298,18 @@ const browser = await chromium.launch();
   check("project nav: PREVIOUS PROJECT kiri + judul", /Previous project/i.test(pn.prevText) && pn.prevText.includes("Cellar Notes") === false && pn.prevAlign === "left", pn.prevText.slice(0, 40));
   check("project nav: NEXT PROJECT kanan + judul", /Next project/i.test(pn.nextText) && pn.nextText.includes("Cellar Notes") && pn.nextAlign === "right", pn.nextText.slice(0, 40));
   check("project nav: garis atas dan bawah", pn.borders[0] === "1px" && pn.borders[1] === "1px", pn.borders.join(" / "));
+  check("project nav: tanpa link 'Kembali ke'", (await page.getByRole("link", { name: /Kembali ke/i }).count()) === 0);
+  // Hover: panah previous -> ↖ (+45°), panah next -> ↗ (-45°)
+  const prevLink = pnav.getByRole("link", { name: /Previous project/i });
+  await prevLink.hover();
+  await sleep(900);
+  const prevRot = await rotationDeg(prevLink.locator("svg").first().locator(".."));
+  check("project nav: panah previous berputar ke ↖ (+45°)", Math.abs(prevRot - 45) < 2, `${prevRot}°`);
+  const nextLink = pnav.getByRole("link", { name: /Next project/i });
+  await nextLink.hover();
+  await sleep(900);
+  const nextRot = await rotationDeg(nextLink.locator("svg").first().locator(".."));
+  check("project nav: panah next berputar ke ↗ (-45°)", Math.abs(nextRot + 45) < 2, `${nextRot}°`);
   await pnav.getByRole("link", { name: /Next project/i }).click();
   await page.waitForURL("**/works/food/cellar-notes");
   check("project nav: klik Next -> proyek berikutnya", page.url().endsWith("/works/food/cellar-notes"));
@@ -305,6 +317,13 @@ const browser = await chromium.launch();
   // Experience: foto berganti saat kursor bergerak, tiap foto beda sudut
   await page.goto(base + "/experience", { waitUntil: "networkidle" });
   await sleep(1500);
+  const companyLines = await page.evaluate(() =>
+    [...document.querySelectorAll("li p.text-display")].map((p) => {
+      const lh = parseFloat(getComputedStyle(p).lineHeight);
+      return { name: p.textContent.replace(/\s+/g, " "), lines: Math.round(p.getBoundingClientRect().height / lh) };
+    }),
+  );
+  check("experience: nama perusahaan selalu dua baris", companyLines.length === 3 && companyLines.every((c) => c.lines === 2), companyLines.map((c) => `${c.name}=${c.lines}`).join(", "));
   const rowEl = page.locator("ul > li").filter({ hasText: "MyMeal Catering" });
   const rb = await rowEl.boundingBox();
   await page.mouse.move(rb.x + 200, rb.y + 60);

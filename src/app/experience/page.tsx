@@ -25,6 +25,7 @@ export default function ExperiencePage() {
   const rows = experience.map((e) => ({
     period: e.period,
     company: e.company,
+    displayName: e.displayName,
     role: e.role,
     description: e.description,
     images: pickImages(e.previewProjects),

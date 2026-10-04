@@ -7,6 +7,7 @@ export const experience: ExperienceItem[] = [
   {
     period: "2025 — Sekarang",
     company: "Jayatama Motorindo",
+    displayName: "Jayatama\nMotorindo",
     role: "Photographer",
     description:
       "Memproduksi foto produk dan materi visual untuk kanal digital perusahaan, termasuk konten untuk program kemitraan.",
@@ -16,6 +17,7 @@ export const experience: ExperienceItem[] = [
   {
     period: "2023 — 2025",
     company: "MyMeal Catering",
+    displayName: "MyMeal\nCatering",
     role: "Photographer",
     description:
       "Memotret menu harian dan musiman untuk layanan katering sehat, serta aset visual untuk konten edukasi gizi di media sosial.",
@@ -24,6 +26,7 @@ export const experience: ExperienceItem[] = [
   {
     period: "2018 — 2023",
     company: "Yawara Boga Indonesia",
+    displayName: "Yawara Boga\nIndonesia",
     role: "Photographer",
     description:
       "Lima tahun bersama grup restoran Jepang: memotret omakase, sushi, sake, dan hidangan musiman untuk menu, katalog, dan media sosial beberapa outlet.",

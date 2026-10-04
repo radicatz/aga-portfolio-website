@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Reveal } from "@/components/motion/Reveal";
 import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
-import { ArrowLink } from "@/components/ui/ArrowLink";
 import { HoverLine } from "@/components/ui/HoverLine";
 import { Gallery } from "@/components/works/Gallery";
 import { ProjectNav } from "@/components/works/ProjectNav";
 import { categoryBySlug } from "@/content/categories";
-import { works } from "@/content/pages";
 import { allProjects, getProject, nextProject, previousProject, projectsByCategory } from "@/content/projects";
 
 export const dynamicParams = false;
@@ -72,18 +70,13 @@ export default async function ProjectPage(props: PageProps<"/works/[category]/[s
         <Gallery images={project.images} title={project.title} story={project.story} />
       </div>
 
-      {/* pb: jarak ke separator blok Next, agar garis hover link tidak menimpa garis abu-abu */}
-      <div className="mt-16 flex items-center justify-between pb-14 text-label md:mt-24 md:pb-20">
-        <ArrowLink href={`/works/${cat.slug}`} direction="left">
-          {works.backLabel} {cat.label}
-        </ArrowLink>
-      </div>
-
       {next && previous && (
-        <ProjectNav
-          previous={{ href: `/works/${previous.category}/${previous.slug}`, title: previous.title }}
-          next={{ href: `/works/${next.category}/${next.slug}`, title: next.title }}
-        />
+        <div className="mt-16 md:mt-24">
+          <ProjectNav
+            previous={{ href: `/works/${previous.category}/${previous.slug}`, title: previous.title }}
+            next={{ href: `/works/${next.category}/${next.slug}`, title: next.title }}
+          />
+        </div>
       )}
     </article>
   );

@@ -15,7 +15,6 @@ export const works = {
   allLabel: "Semua",
   intro:
     "Lima ruang kerja, satu cara melihat. Setiap proyek dimulai dari hal yang sama: memperhatikan cahaya sebelum menekan rana.",
-  backLabel: "Kembali ke",
   previousLabel: "Previous project",
   nextLabel: "Next project",
 };

@@ -8,6 +8,8 @@ import { springSoft } from "@/lib/motion";
 export type ExperienceRowData = {
   period: string;
   company: string;
+  /** Nama tampilan dengan pemisah baris paksa (newline). */
+  displayName: string;
   role: string;
   description: string;
   images: StaticImageData[];
@@ -75,7 +77,8 @@ export function ExperienceList({ items }: { items: ExperienceRowData[] }) {
           >
             <p className="text-label text-muted md:col-span-3">{item.period}</p>
             <div className="md:col-span-5">
-              <p className="text-display">{item.company}</p>
+              {/* whitespace-pre-line: pemisah baris pada displayName membuat nama selalu dua baris */}
+              <p className="text-display whitespace-pre-line">{item.displayName}</p>
             </div>
             <div className="md:col-span-4">
               <p className="text-label">{item.role}</p>
