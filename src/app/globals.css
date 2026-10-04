@@ -41,6 +41,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
+  font-weight: 300; /* body ringan; label tetap 500 (text-label), display memakai 400 (satu-satunya bobot Murmure) */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -74,6 +75,7 @@ body {
 }
 
 @utility text-body {
+  font-weight: 300;
   font-size: clamp(16px, 1.2vw, 18px);
   line-height: 1.6;
 }

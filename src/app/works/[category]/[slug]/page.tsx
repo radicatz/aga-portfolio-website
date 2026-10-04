@@ -70,7 +70,8 @@ export default async function ProjectPage(props: PageProps<"/works/[category]/[s
         <Gallery images={project.images} title={project.title} story={project.story} />
       </div>
 
-      <div className="mt-16 flex items-center justify-between text-label md:mt-24">
+      {/* pb: jarak ke separator blok Next, agar garis hover link tidak menimpa garis abu-abu */}
+      <div className="mt-16 flex items-center justify-between pb-14 text-label md:mt-24 md:pb-20">
         <ArrowLink href={`/works/${cat.slug}`} direction="left">
           {works.backLabel} {cat.label}
         </ArrowLink>

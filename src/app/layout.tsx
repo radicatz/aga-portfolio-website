@@ -21,7 +21,7 @@ const display = localFont({
 const body = Space_Grotesk({
   variable: "--font-body-face",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {

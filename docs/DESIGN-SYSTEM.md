@@ -21,7 +21,7 @@ Tailwind: `bg-bg text-fg text-muted border-line bg-surface`. Garis tipis memakai
 | Display (hero, judul halaman/proyek, wordmark, CTA footer, nilai kontak) | **Le Murmure** (SIL OFL 1.1, `assets/fonts/le-murmure/`) | `text-display`, `font-display` |
 | Judul panel (cerita proyek di lightbox) | Le Murmure | `text-heading` |
 | H2 / judul kartu | Le Murmure | `text-title` |
-| Body | **Space Grotesk** 400 (Google Fonts) | `text-body` |
+| Body | **Space Grotesk** 300 Light (Google Fonts; default `body`) | `text-body` |
 | Nav / label / meta | Space Grotesk 500 uppercase | `text-label` |
 
 Variabel font: `--font-display-face` / `--font-body-face` (next/font di `layout.tsx`) dipetakan ke `--font-display` / `--font-body` di `globals.css`. Murmure sangat condensed: `text-display` memakai line-height 0.92. Sumber lengkap font (spesimen, glyphs) ada di `.context/fonts/murmure-main/`.
@@ -98,4 +98,4 @@ Semua butuh server berjalan: `npm run build && npx next start -p 3100`. Di Git B
 
 ## 8. Ikon dan lisensi
 
-Ikon panah dan telepon memakai set **Guidance** oleh Streamline (CC BY 4.0). Atribusi wajib ada di footer (`site.footer.iconCredit`) dan README. Guidance tidak punya ikon WhatsApp, jadi `WhatsAppIcon` digambar sendiri bergaya Guidance (gelembung + gagang telepon Guidance yang dipusatkan). Font Le Murmure berlisensi SIL OFL 1.1 (`assets/fonts/le-murmure/LICENSE.txt`).
+Ikon panah (varian "short": `left-2-short-arrow` / `right-2-short-arrow`) dan telepon memakai set **Guidance** oleh Streamline (CC BY 4.0). Atribusi wajib ada di footer (`site.footer.iconCredit`) dan README. Guidance tidak punya ikon WhatsApp, jadi `WhatsAppIcon` digambar sendiri bergaya Guidance (gelembung + gagang telepon Guidance yang dipusatkan). Font Le Murmure berlisensi SIL OFL 1.1 (`assets/fonts/le-murmure/LICENSE.txt`).
