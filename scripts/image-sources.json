@@ -1,0 +1,186 @@
+{
+  "_comment": "Peta kurasi foto: proyek -> file sumber (urutan = urutan tampil). Awalan 'foto:' = .context/Portofolio/Foto, 'ig:' = .context/instagram. Lihat docs/PLAN.md §6. Ditahan (resolusi rendah, tunggu file asli dari Aga): proyek aroma-dalam-gelap (parfum, parfum 2, bottle), serta single jam dan cincin.",
+  "projects": [
+    {
+      "category": "food",
+      "slug": "omakase-sake",
+      "files": [
+        "foto:Food/DSC_0054.jpg",
+        "foto:Food/DSC_0063.jpg",
+        "foto:Food/DSC_0076.jpg",
+        "foto:Food/DSC_0085.jpg",
+        "foto:Food/DSC02517.jpg",
+        "foto:Food/DSC02519.jpg",
+        "foto:Food/DSC02533.jpg",
+        "foto:Food/DSC08132-Enhanced-NR.jpg",
+        "foto:Food/DSC09127.jpg",
+        "foto:Food/DSC_0128-Enhanced-NR.jpg",
+        "foto:Food/FILE095.jpg",
+        "foto:Food/FILE102.jpg",
+        "foto:Food/FILE110.jpg",
+        "foto:Food/FILE137.jpg",
+        "foto:Food/FILE188.jpg",
+        "foto:Food/DSC00386.jpg"
+      ]
+    },
+    {
+      "category": "food",
+      "slug": "cellar-notes",
+      "files": [
+        "foto:Food/DSC00293.jpg",
+        "foto:Food/DSC00312.jpg",
+        "foto:Food/DSC00317.jpg",
+        "foto:Food/DSC00322.jpg",
+        "foto:Food/DSC00337.jpg",
+        "foto:Food/DSC00342.jpg"
+      ]
+    },
+    {
+      "category": "food",
+      "slug": "meja-ramadan",
+      "files": [
+        "foto:Food/MMC01859.JPG",
+        "foto:Food/MMC01869.JPG",
+        "foto:Food/MMC01979.JPG",
+        "foto:Food/MMC01982.JPG",
+        "foto:Food/MMC02301.JPG",
+        "foto:Food/MMC02307.JPG",
+        "foto:Food/MMC02329.JPG",
+        "foto:Food/MMC02331.JPG",
+        "foto:Food/MMC02403.JPG",
+        "foto:Food/MMC02407.JPG",
+        "foto:Food/MMC02421.JPG"
+      ]
+    },
+    {
+      "category": "food",
+      "slug": "hidangan-rumahan",
+      "files": [
+        "foto:Food/MMC00089.JPG",
+        "foto:Food/MMC00156.JPG",
+        "foto:Food/MMC01624.JPG",
+        "foto:Food/MMC01636.JPG",
+        "foto:Food/MMC09914.JPG",
+        "foto:Food/MMC09925.JPG"
+      ]
+    },
+    {
+      "category": "product",
+      "slug": "ritual-kulit",
+      "files": [
+        "foto:Product/DSC_0267.jpg",
+        "foto:Product/DSC_0276.jpg",
+        "foto:Product/DSC_0298.jpg",
+        "foto:Product/DSC_0414-2.jpg",
+        "foto:Product/DSC_0427.jpg",
+        "foto:Product/DSC_0454-4.jpg",
+        "foto:Product/Serum.jpg",
+        "foto:Product/Studio Session-060-2.jpg"
+      ]
+    },
+    {
+      "category": "product",
+      "slug": "penanda-waktu",
+      "files": [
+        "foto:Product/DSC_0302.jpg",
+        "foto:Product/DSC_0305.jpg",
+        "foto:Product/DSC_0410.jpg",
+        "foto:Product/jam.jpg"
+      ]
+    },
+    {
+      "category": "product",
+      "slug": "batu-kilau",
+      "files": [
+        "foto:Product/DSC_1430.jpg",
+        "foto:Product/DSC_2340.jpg"
+      ]
+    },
+    {
+      "category": "portrait",
+      "slug": "denim-cahaya-lembut",
+      "files": [
+        "foto:Potrait/DSC00806.jpg",
+        "foto:Potrait/DSC00895.jpg",
+        "foto:Potrait/DSC00912.jpg",
+        "foto:Potrait/DSC00918.jpg",
+        "foto:Potrait/DSC01031.jpg",
+        "foto:Potrait/DSC01034.jpg"
+      ]
+    },
+    {
+      "category": "portrait",
+      "slug": "hitam-putih-kursi",
+      "files": [
+        "foto:Potrait/DSC00975.jpg",
+        "foto:Potrait/DSC00978.jpg",
+        "foto:Potrait/DSC00990.jpg"
+      ]
+    },
+    {
+      "category": "portrait",
+      "slug": "tujuh-belas",
+      "files": [
+        "foto:Potrait/DSC_0010.jpg",
+        "foto:Potrait/DSC_0017.jpg",
+        "foto:Potrait/DSC_0020-2.jpg",
+        "foto:Potrait/DSC_0024.jpg"
+      ]
+    },
+    {
+      "category": "documentation",
+      "slug": "hunting-di-pulau",
+      "files": [
+        "foto:Documentation/1728956333381.jpg",
+        "foto:Documentation/1728956333431.jpg",
+        "foto:Documentation/1728956333439.jpg",
+        "foto:Documentation/1728956333459.jpg",
+        "foto:Documentation/1728956333484.jpg",
+        "foto:Documentation/_MG_3702.JPG",
+        "foto:Documentation/_MG_3730.JPG",
+        "foto:Documentation/_MG_3737.JPG",
+        "foto:Documentation/_MG_3738.JPG",
+        "foto:Documentation/_MG_3740.JPG",
+        "foto:Documentation/_MG_3746.JPG"
+      ]
+    },
+    {
+      "category": "documentation",
+      "slug": "pelatihan-fotografi",
+      "files": [
+        "foto:Documentation/20230822160246_IMG_5540.JPG",
+        "foto:Documentation/20230822160307_IMG_5542.JPG"
+      ]
+    },
+    {
+      "category": "street",
+      "slug": "ritme-malam-kota",
+      "files": [
+        "ig:DSXbEXaiTcT_0.jpg",
+        "ig:DR5LUkUE4EQ_0.jpg",
+        "ig:DRcGOmNiaD9_0.jpg",
+        "ig:DRZr-G_iWHr_0.jpg",
+        "ig:DRPmBzkCe3G_0.jpg"
+      ]
+    },
+    {
+      "category": "street",
+      "slug": "kembali-hunting",
+      "files": [
+        "ig:Dcno0DRCWJj_0.jpg",
+        "ig:Dcno0DRCWJj_1.jpg",
+        "ig:Dcno0DRCWJj_2.jpg",
+        "ig:DTKe_teiXMy_0.jpg"
+      ]
+    },
+    {
+      "category": "street",
+      "slug": "sebelum-kota",
+      "files": [
+        "ig:CoOhGcyr_VU_0.jpg",
+        "ig:CoJU-BjL-oo_0.jpg",
+        "ig:CoL6C-NL-93_0.jpg"
+      ]
+    }
+  ]
+}

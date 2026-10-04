@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* Token warna: lihat docs/DESIGN-SYSTEM.md §1. Tema diatur lewat atribut data-theme (next-themes). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #ffffff;
+  --fg: #0a0a0a;
+  --muted: #6e6d6d; /* referensi #7d7c7c (4.16:1) gagal WCAG AA; ini 5.1:1 */
+  --line: #262525;
+  --surface: #f6f5f2;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #0e0e0d;
+  --fg: #f1f0ec;
+  --muted: #8c8b87;
+  --line: #f1f0ec;
+  --surface: #171716;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --font-serif: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --breakpoint-tablet: 810px;
+  --breakpoint-desktop: 1200px;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* Tipografi: docs/DESIGN-SYSTEM.md §2 */
+@utility text-display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(44px, 7vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+
+@utility text-cta {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(56px, 11vw, 160px);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+}
+
+@utility text-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(26px, 2.6vw, 36px);
+  line-height: 1.1;
+}
+
+@utility text-body {
+  font-size: clamp(16px, 1.2vw, 18px);
+  line-height: 1.6;
+}
+
+@utility text-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Grid dan spacing: docs/DESIGN-SYSTEM.md §3 */
+@utility container-site {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  @media (min-width: 810px) {
+    padding-inline: 24px;
+  }
+}
+
+@utility py-section {
+  padding-block: 64px;
+  @media (min-width: 810px) {
+    padding-block: 96px;
+  }
+  @media (min-width: 1200px) {
+    padding-block: 120px;
+  }
+}
+
+/* HoverLine: garis 1px tumbuh dari kiri (referensi: tween 0.5s, ease [.44,0,.56,1]).
+   Aktif pada hover, fokus keyboard, dan halaman/tab aktif. */
+.hover-line {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.hover-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 1px;
+  opacity: 0;
+  background: currentColor;
+  transition:
+    width 0.5s cubic-bezier(0.44, 0, 0.56, 1),
+    opacity 0.5s cubic-bezier(0.44, 0, 0.56, 1);
+}
+
+.hover-line:hover::after,
+.hover-line:focus-visible::after,
+.group:hover > .hover-line::after,
+.group:focus-visible > .hover-line::after,
+.hover-line[aria-current="page"]::after,
+.hover-line[data-active="true"]::after {
+  width: 100%;
+  opacity: 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+/* Transisi pergantian tema (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-line::after {
+    transition: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
