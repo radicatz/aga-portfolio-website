@@ -359,6 +359,8 @@ const browser = await chromium.launch();
   });
   check("project nav: PREVIOUS PROJECT kiri + judul", /Previous project/i.test(pn.prevText) && pn.prevText.includes("Cellar Notes") === false && pn.prevAlign === "left", pn.prevText.slice(0, 40));
   check("project nav: NEXT PROJECT kanan + judul", /Next project/i.test(pn.nextText) && pn.nextText.includes("Cellar Notes") && pn.nextAlign === "right", pn.nextText.slice(0, 40));
+  const navTitleSize = await pnav.evaluate((n) => [...n.querySelectorAll("span.mt-2")].map((el) => parseFloat(getComputedStyle(el).fontSize)));
+  check("project nav: judul memakai ukuran text-title (<= 40px)", navTitleSize.length >= 1 && navTitleSize.every((px) => px <= 40.5), navTitleSize.map((px) => px.toFixed(0) + "px").join(" / "));
   check("project nav: strip tanpa garis sendiri", pn.borders[0] === "0px" && pn.borders[1] === "0px", pn.borders.join(" / "));
   check("pemisah: atas navigasi = atas CTA = bawah CTA (lebar sama)", pn.ruleWidths.every((w) => Math.abs(w - pn.ruleWidths[0]) < 1.5), pn.ruleWidths.map((w) => w.toFixed(0)).join(" / "));
   check("project nav: garis di atas navigasi + garis di atas CTA footer", pn.wrapBorder === "1px" && pn.footerBorder === "1px" && Math.abs(pn.wrapGap) < 2, `atas ${pn.wrapBorder}, footer ${pn.footerBorder}, jarak ke footer ${pn.wrapGap.toFixed(1)}px`);

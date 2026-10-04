@@ -39,7 +39,7 @@ export function ProjectNav({ previous, next }: Props) {
               </motion.span>
               {works.previousLabel}
             </span>
-            <span className="text-heading mt-2 block">{previous.title}</span>
+            <span className="text-title mt-2 block">{previous.title}</span>
           </motion.span>
         </Link>
       )}
@@ -59,7 +59,7 @@ export function ProjectNav({ previous, next }: Props) {
               <Icon name="arrow-right" className="size-4" />
             </motion.span>
           </span>
-          <span className="text-heading mt-2 block">{next.title}</span>
+          <span className="text-title mt-2 block">{next.title}</span>
         </motion.span>
       </Link>
     </nav>
