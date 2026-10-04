@@ -24,6 +24,9 @@ export function ProjectCard({ project, sizes, priority, decorative }: Props) {
     <motion.div whileHover={{ scale: 0.9 }} transition={springCard} className="group">
       <Link
         href={`/works/${project.category}/${project.slug}`}
+        // draggable=false: tanpa ini browser memulai drag-and-drop tautan bawaan saat kartu ditekan lalu digeser,
+        // yang membatalkan pointer events dan membuat drag marquee berhenti setelah beberapa piksel.
+        draggable={false}
         tabIndex={decorative ? -1 : undefined}
         aria-hidden={decorative || undefined}
         className="block"

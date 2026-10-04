@@ -5,9 +5,10 @@ import { FooterCTASection } from "./FooterCTASection";
 export function Footer() {
   const { contact } = site;
 
-  // pb-20 pada <footer>: ruang di bawah agar baris hak cipta/atribusi bisa digulir melewati tombol WhatsApp sticky
+  // Hak cipta dan atribusi ikon sama-sama rata kiri agar pojok kanan bawah bebas dari tombol WhatsApp sticky (desktop: tanpa padding
+  // tambahan). Di mobile baris lebih panjang, jadi diberi ruang bawah agar bisa digulir melewati tombol.
   return (
-    <footer className="pb-20">
+    <footer className="max-md:pb-16">
       <div className="container-site">
         <FooterCTASection />
 
@@ -38,7 +39,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-line/15 py-6 text-label text-muted md:flex-row md:justify-between">
+        <div className="flex flex-col gap-2 border-t border-line/15 py-6 text-label text-muted md:flex-row md:gap-10">
           <p>{site.footer.copyright}</p>
           <p>
             {site.footer.iconCredit.prefix}{" "}

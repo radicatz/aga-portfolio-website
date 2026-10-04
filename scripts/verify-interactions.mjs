@@ -103,6 +103,33 @@ const browser = await chromium.launch();
   check("drag marquee menggeser track", Math.abs(afterDrag - before) > 150, `${(afterDrag - before).toFixed(0)} px`);
   check("drag tidak memicu navigasi kartu", new URL(page.url()).pathname === "/");
 
+  // Drag nyata di atas FOTO kartu (tautan): strip harus mengikuti kursor 1:1, tanpa drag-and-drop bawaan browser
+  await page.mouse.move(700, 120);
+  await sleep(600);
+  await page.evaluate(() => {
+    window.__ev = { dragstart: 0, pointercancel: 0 };
+    window.addEventListener("dragstart", () => window.__ev.dragstart++, true);
+    window.addEventListener("pointercancel", () => window.__ev.pointercancel++, true);
+  });
+  const cardPos = await page.evaluate(() => {
+    const r = [...document.querySelectorAll("section[aria-label='Karya pilihan'] a")].map((el) => el.getBoundingClientRect()).find((b) => b.left > 700 && b.right < 1400 && b.top < 700);
+    return { x: r.left + r.width / 2, y: Math.min(r.top + 150, 800) };
+  });
+  await page.mouse.move(cardPos.x, cardPos.y);
+  await sleep(300);
+  const t0 = await translateX(page, trackSel);
+  await page.mouse.down();
+  for (let i = 1; i <= 30; i++) {
+    await page.mouse.move(cardPos.x - i * 20, cardPos.y);
+    await sleep(12);
+  }
+  const t1 = await translateX(page, trackSel);
+  await page.mouse.up();
+  const dragEv = await page.evaluate(() => window.__ev);
+  check("drag di atas foto kartu: strip mengikuti kursor 1:1 (600px)", Math.abs(Math.abs(t1 - t0) - 600) < 40, `strip bergeser ${(t1 - t0).toFixed(0)}px`);
+  check("drag di atas foto kartu: tanpa dragstart/pointercancel bawaan browser", dragEv.dragstart === 0 && dragEv.pointercancel === 0, JSON.stringify(dragEv));
+  await sleep(1500);
+
   // Marquee: flick (drag cepat lalu lepas) menimbulkan inertia: lebih cepat dari kecepatan otomatis
   await page.mouse.move(1100, 700);
   await page.mouse.down();
@@ -501,6 +528,12 @@ const browser = await chromium.launch();
     return hit.map((el) => el.textContent.trim().slice(0, 30));
   });
   check("dasar halaman: tombol WhatsApp tidak menutupi teks footer", overlap.length === 0, overlap.join(" | "));
+  // Ruang di bawah baris hak cipta tidak berlebihan (desktop)
+  const below = await page.evaluate(() => {
+    const row = [...document.querySelectorAll("footer p")].find((el) => el.textContent.includes("©"));
+    return document.documentElement.scrollHeight - (row.getBoundingClientRect().bottom + window.scrollY);
+  });
+  check("footer: ruang di bawah baris hak cipta <= 40px (desktop)", below <= 40, `${below.toFixed(0)}px`);
   // Di halaman lain, FAB tetap tersembunyi saat CTA footer terlihat
   await page.goto(base + "/about", { waitUntil: "networkidle" });
   await sleep(1800);
@@ -526,6 +559,23 @@ const browser = await chromium.launch();
   check("menu mobile menutup setelah navigasi", (await page.locator("#mobile-menu").count()) === 0);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   check("tanpa scroll horizontal di 390px", !overflow);
+
+  // Mobile: di dasar halaman, tombol WhatsApp tidak menutupi teks footer
+  await page.goto(base + "/contact", { waitUntil: "networkidle" });
+  await sleep(2200);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await sleep(1200);
+  const mobileOverlap = await page.evaluate(() => {
+    const fab = document.querySelector("a[aria-label='Chat dengan Aga via WhatsApp']")?.getBoundingClientRect();
+    if (!fab) return ["FAB tidak ada"];
+    return [...document.querySelectorAll("footer p, footer a, footer span")]
+      .filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.left < fab.right && r.right > fab.left && r.top < fab.bottom && r.bottom > fab.top;
+      })
+      .map((el) => el.textContent.trim().slice(0, 30));
+  });
+  check("mobile: tombol WhatsApp tidak menutupi teks footer di dasar halaman", mobileOverlap.length === 0, mobileOverlap.join(" | "));
 
   // Marquee mobile: touch-action pan-y agar swipe horizontal men-drag dan vertikal tetap scroll
   await page.goto(base + "/", { waitUntil: "networkidle" });

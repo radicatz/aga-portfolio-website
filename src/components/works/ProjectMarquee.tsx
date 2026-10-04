@@ -105,7 +105,7 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
 
   return (
     <div
-      className="cursor-grab touch-pan-y select-none overflow-hidden active:cursor-grabbing"
+      className="cursor-grab touch-pan-y select-none overflow-hidden active:cursor-grabbing [&_a]:cursor-[inherit]"
       aria-label="Karya pilihan"
       role="region"
       onPointerEnter={() => {
@@ -114,6 +114,8 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
       onPointerLeave={() => {
         hovered.current = false;
       }}
+      // Cadangan: batalkan drag-and-drop bawaan browser (tautan/gambar) agar drag marquee tidak terputus.
+      onDragStart={(e) => e.preventDefault()}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
