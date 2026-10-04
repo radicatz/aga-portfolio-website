@@ -74,14 +74,14 @@ Status: ✅ siap · 🚧 dalam proses · ⬜ belum dibuat. Semua komponen di baw
 | `Navbar` | `src/components/nav/Navbar.tsx` ✅ | Sticky, hide on scroll down. Menerima `categories` dari layout |
 | `MobileMenu` | `src/components/nav/MobileMenu.tsx` ✅ | Overlay layar penuh, stagger |
 | `ThemeToggle` | `src/components/nav/ThemeToggle.tsx` ✅ | LIGHT / DARK dengan View Transitions |
-| `Footer` / `FooterCTA` | `src/components/layout/` ✅ | Footer + CTA (`text-display`, scale 0.9, panah ↗); atribusi ikon CC BY 4.0; `data-hide-fab` |
+| `Footer` / `FooterCTA` | `src/components/layout/` ✅ | Footer + CTA (`text-display`, scale 0.9, panah ↗); pemisah abu-abu di atas CTA (`[data-footer-rule]` di dalam container, selebar pemisah di bawahnya; semua halaman); atribusi ikon CC BY 4.0; `data-hide-fab` |
 | `WhatsAppFab` | `src/components/layout/WhatsAppFab.tsx` ✅ | Tombol sticky; tersembunyi bila `[data-hide-fab]` terlihat |
 | `ProjectCard` | `src/components/works/ProjectCard.tsx` ✅ | Kartu proyek, hover scale 0.9 (spring) |
 | `ProjectMarquee` | `src/components/works/ProjectMarquee.tsx` ✅ | Ticker Home 50/30 px/s, hover 25%, drag + inertia; reduced-motion = carousel |
 | `CategoryTabs` | `src/components/works/CategoryTabs.tsx` ✅ | Tab filter sticky |
 | `WorksView` | `src/components/works/WorksView.tsx` ✅ | Judul + tab + intro + grid (/works dan /works/[category]) |
 | `Gallery` / `Lightbox` | `src/components/works/` ✅ | Galeri editorial (pasangan foto tinggi sama via flex-grow = rasio, tanpa crop) + lightbox layar penuh gaya `.context/design/gallery.png` (foto + kontrol kiri, judul/cerita kanan, animasi geser+blur searah navigasi, zoom hover 4x untuk mouse, Esc/panah/swipe, focus trap) |
-| `ProjectNav` | `src/components/works/ProjectNav.tsx` ✅ | Navigasi antarproyek: strip bergaris atas-bawah, "← PREVIOUS PROJECT" + judul (kiri) dan "NEXT PROJECT →" + judul (kanan); hover opacity 0.5, panah next berputar ↗ |
+| `ProjectNav` | `src/components/works/ProjectNav.tsx` ✅ | Navigasi antarproyek: garis abu-abu di atas (dari halaman) dan di bawah (pemisah footer), "← PREVIOUS PROJECT" + judul (kiri) dan "NEXT PROJECT →" + judul (kanan); hover opacity 0.5, panah next berputar ↗ |
 | `WorkplaceCard` | `src/components/about/WorkplaceCard.tsx` ✅ | Kartu tempat kerja (scale 0.8 + skew) |
 | `ExperienceList` | `src/components/experience/ExperienceList.tsx` ✅ | Baris pengalaman; thumbnail ikut kursor, berganti tiap 80px gerak dengan sudut tetap berbeda per foto |
 | `CopyButton` | `src/components/contact/CopyButton.tsx` ✅ | Salin email |

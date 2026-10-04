@@ -71,8 +71,8 @@ export default async function ProjectPage(props: PageProps<"/works/[category]/[s
       </div>
 
       {next && previous && (
-        // border-b: pemisah abu-abu di atas CTA footer "Mari Abadikan Cerita Anda" (hanya di halaman proyek yang punya navigasi)
-        <div className="mt-16 border-b border-line/15 md:mt-24">
+        // border-t: pemisah abu-abu di atas navigasi; garis bawahnya adalah pemisah di atas CTA footer (border-t pada <footer>)
+        <div className="mt-16 border-t border-line/15 md:mt-24">
           <ProjectNav
             // Kategori dengan dua proyek: previous = next, jadi hanya tombol "Next project" yang ditampilkan.
             previous={previous.slug === next.slug ? null : { href: `/works/${previous.category}/${previous.slug}`, title: previous.title }}

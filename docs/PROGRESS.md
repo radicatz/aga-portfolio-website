@@ -57,6 +57,7 @@ Status: `[ ]` belum · `[~]` sedang · `[x]` selesai. Perbarui di akhir setiap t
 - [x] Verifikasi: 42/42 uji interaksi, axe 0 pelanggaran, gambar <= 90 KB
 - [x] Project nav: tanpa garis sendiri, pemisah abu-abu di atas CTA footer; kategori dua proyek hanya menampilkan "Next project"
 - [x] Slideshow: zoom hover 4x (smooth spring, titik zoom mengikuti kursor, resolusi tinggi saat hover); hanya mouse
+- [x] Pemisah abu-abu di atas CTA footer di semua halaman (lebar container, sama dengan garis bawahnya); garis juga di atas navigasi proyek; jarak >= 100px antara konten terakhir dan pemisah
 - [ ] Foto sumber di `assets/images` dibatasi 2400px; zoom 4x pada foto landscape lebar agak lunak. Naikkan `MAX_SIDE` di `scripts/optimize-images.mjs` (mis. 3600) bila ingin lebih tajam, dengan konsekuensi ukuran aset naik
 - [ ] Foto Jayatama untuk hover Experience (sementara memakai foto produk: ritual-kulit, penanda-waktu, batu-kilau)
 

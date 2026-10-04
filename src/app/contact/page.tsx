@@ -16,7 +16,7 @@ export default function ContactPage() {
   const { contact: c } = site;
 
   return (
-    <div className="container-site pt-12 md:pt-20">
+    <div className="container-site pb-section pt-12 md:pt-20">
       <SplitTextReveal text={contact.title} className="text-display max-w-[14ch]" />
       <Reveal>
         <p className="text-body mt-8 max-w-xl text-muted">{contact.text}</p>

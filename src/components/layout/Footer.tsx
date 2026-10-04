@@ -8,7 +8,10 @@ export function Footer() {
   return (
     <footer>
       <div className="container-site">
-        <FooterCTA />
+        {/* Pemisah atas CTA berada di dalam container agar selebar pemisah di bawahnya (bukan selebar layar) */}
+        <div data-footer-rule className="border-t border-line/15">
+          <FooterCTA />
+        </div>
 
         <div className="grid gap-10 border-t border-line/15 py-10 text-label md:grid-cols-3">
           <ul className="flex flex-col gap-3">

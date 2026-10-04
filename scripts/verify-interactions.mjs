@@ -225,9 +225,40 @@ const browser = await chromium.launch();
   }));
   check("tab Works: garis hover sejajar separator", tabGeo.afterWidth > 20 && Math.abs(tabGeo.ulBottom - tabGeo.linkBottom - 1) < 0.6, `selisih ${(tabGeo.ulBottom - tabGeo.linkBottom).toFixed(2)}px`);
 
-  // Tidak ada separator sebelum CTA footer
-  const footerBorder = await page.evaluate(() => getComputedStyle(document.querySelector("footer")).borderTopWidth);
-  check("tanpa separator di atas footer", footerBorder === "0px", footerBorder);
+  // Pemisah abu-abu di atas CTA footer "Mari Abadikan Cerita Anda" harus ada di semua halaman
+  const sepRoutes = ["/", "/works", "/works/food", "/about", "/experience", "/services", "/contact", "/tidak-ada"];
+  const noSeparator = [];
+  for (const r of sepRoutes) {
+    await page.goto(base + r, { waitUntil: "networkidle" });
+    const w = await page.evaluate(() => getComputedStyle(document.querySelector("footer [data-footer-rule]")).borderTopWidth);
+    if (w !== "1px") noSeparator.push(`${r}:${w}`);
+  }
+  check(`pemisah abu-abu di atas CTA footer di ${sepRoutes.length} halaman`, noSeparator.length === 0, noSeparator.join(", "));
+
+  // Konten terakhir tidak boleh menempel ke pemisah footer: jarak >= 100px di halaman yang berakhir dengan grid/daftar
+  const gapRoutes = ["/", "/works", "/works/food", "/works/street", "/services", "/contact", "/about", "/experience"];
+  const tight = [];
+  for (const r of gapRoutes) {
+    await page.goto(base + r, { waitUntil: "networkidle" });
+    await sleep(1300);
+    // gulir sampai bawah agar elemen whileInView muncul dan terukur
+    await page.evaluate(async () => {
+      for (let y = 0; y < document.body.scrollHeight; y += 500) {
+        window.scrollTo(0, y);
+        await new Promise((res) => setTimeout(res, 70));
+      }
+    });
+    await sleep(900);
+    const gap = await page.evaluate(() => {
+      const main = document.querySelector("main");
+      const leaves = [...main.querySelectorAll("*")].filter((el) => el.children.length === 0 && el.getBoundingClientRect().height > 0 && !el.closest(".fixed"));
+      const lastBottom = Math.max(...leaves.map((el) => el.getBoundingClientRect().bottom));
+      return document.querySelector("footer").getBoundingClientRect().top - lastBottom;
+    });
+    if (gap < 100) tight.push(`${r}:${gap.toFixed(0)}px`);
+  }
+  check(`jarak konten terakhir ke pemisah footer >= 100px di ${gapRoutes.length} halaman`, tight.length === 0, tight.join(", "));
+
 
   // Galeri: pasangan foto tinggi sama, tanpa latar abu-abu
   await page.goto(base + "/works/food/omakase-sake", { waitUntil: "networkidle" });
@@ -277,10 +308,10 @@ const browser = await chromium.launch();
       return m === "none" ? 1 : new DOMMatrix(m).a;
     });
   await page.mouse.move(5, 5);
-  await sleep(2200); // kursor sempat berada di atas panggung saat lightbox terbuka; beri waktu spring kembali ke 1x
+  await sleep(2600); // kursor sempat berada di atas panggung saat lightbox terbuka; beri waktu spring kembali ke 1x
   check("slideshow zoom: normal 1x sebelum hover", Math.abs((await zoomScale()) - 1) < 0.02);
   await page.mouse.move(sb.x + sb.width * 0.4, sb.y + sb.height * 0.4);
-  await sleep(2000); // spring zoom sengaja lembut, beri waktu menetap
+  await sleep(2400); // zoom sengaja lambat (1,4 dtk), beri waktu menetap
   const zIn = await zoomScale();
   check("slideshow zoom: hover memperbesar foto 4x", Math.abs(zIn - 4) < 0.15, `${zIn.toFixed(2)}x`);
   const o1 = await zoomLayer().evaluate((el) => getComputedStyle(el).transformOrigin);
@@ -293,7 +324,7 @@ const browser = await chromium.launch();
   check("slideshow zoom: titik zoom meluncur halus (tidak melompat)", oMid !== o1 && oMid !== o2, `tengah ${oMid}`);
   check("slideshow zoom: memuat resolusi tinggi saat hover", (await dialog.locator("img").last().getAttribute("sizes")) === "2400px");
   await page.mouse.move(5, 5);
-  await sleep(2000);
+  await sleep(2400);
   check("slideshow zoom: kembali 1x saat kursor keluar", Math.abs((await zoomScale()) - 1) < 0.05, `${(await zoomScale()).toFixed(2)}x`);
 
   const srcBefore = await dialog.locator("img").first().getAttribute("src");
@@ -322,14 +353,15 @@ const browser = await chromium.launch();
     const cs = getComputedStyle(n);
     return {
       prevText: prev.textContent, nextText: next.textContent, prevHref: prev.getAttribute("href"), nextHref: next.getAttribute("href"),
-      borders: [cs.borderTopWidth, cs.borderBottomWidth], wrapBorder: getComputedStyle(n.parentElement).borderBottomWidth,
+      borders: [cs.borderTopWidth, cs.borderBottomWidth], wrapBorder: getComputedStyle(n.parentElement).borderTopWidth, footerBorder: getComputedStyle(document.querySelector("footer [data-footer-rule]")).borderTopWidth, ruleWidths: [n.parentElement.getBoundingClientRect().width, document.querySelector("footer [data-footer-rule]").getBoundingClientRect().width, document.querySelector("footer .grid").getBoundingClientRect().width],
       wrapGap: document.querySelector("footer").getBoundingClientRect().top - n.parentElement.getBoundingClientRect().bottom, prevAlign: getComputedStyle(prev).textAlign, nextAlign: getComputedStyle(next).textAlign,
     };
   });
   check("project nav: PREVIOUS PROJECT kiri + judul", /Previous project/i.test(pn.prevText) && pn.prevText.includes("Cellar Notes") === false && pn.prevAlign === "left", pn.prevText.slice(0, 40));
   check("project nav: NEXT PROJECT kanan + judul", /Next project/i.test(pn.nextText) && pn.nextText.includes("Cellar Notes") && pn.nextAlign === "right", pn.nextText.slice(0, 40));
   check("project nav: strip tanpa garis sendiri", pn.borders[0] === "0px" && pn.borders[1] === "0px", pn.borders.join(" / "));
-  check("project nav: pemisah abu-abu tepat di atas CTA footer", pn.wrapBorder === "1px" && Math.abs(pn.wrapGap) < 2, `border ${pn.wrapBorder}, jarak ke footer ${pn.wrapGap.toFixed(1)}px`);
+  check("pemisah: atas navigasi = atas CTA = bawah CTA (lebar sama)", pn.ruleWidths.every((w) => Math.abs(w - pn.ruleWidths[0]) < 1.5), pn.ruleWidths.map((w) => w.toFixed(0)).join(" / "));
+  check("project nav: garis di atas navigasi + garis di atas CTA footer", pn.wrapBorder === "1px" && pn.footerBorder === "1px" && Math.abs(pn.wrapGap) < 2, `atas ${pn.wrapBorder}, footer ${pn.footerBorder}, jarak ke footer ${pn.wrapGap.toFixed(1)}px`);
   check("project nav: tanpa link 'Kembali ke'", (await page.getByRole("link", { name: /Kembali ke/i }).count()) === 0);
   // Hover: panah previous -> ↖ (+45°), panah next -> ↗ (-45°)
   const prevLink = pnav.getByRole("link", { name: /Previous project/i });

@@ -20,7 +20,7 @@ export default function ServicesPage() {
         <p className="text-body mt-8 max-w-xl text-muted">{servicesIntro}</p>
       </Reveal>
 
-      <ul className="mt-14 grid gap-x-6 gap-y-14 md:mt-20 md:grid-cols-2">
+      <ul className="mt-14 grid gap-x-6 gap-y-14 pb-section md:mt-20 md:grid-cols-2">
         {services.map((s) => {
           const project = getProjectBySlug(s.previewProject)!;
           return (

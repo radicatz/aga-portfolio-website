@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import Image, { type StaticImageData } from "next/image";
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 import { Icon } from "@/components/ui/Icon";
@@ -28,9 +28,13 @@ const slide = {
 /** Perbesaran saat hover (mouse). Foto sumber maks 2400px: 4x paling tajam pada foto portrait, foto landscape lebar agak lunak. */
 const ZOOM = 4;
 
-// Zoom dibuat halus: skala berpegas lembut (tanpa pantulan) dan titik zoom meluncur mengikuti kursor, tidak melompat.
-const SCALE_SPRING = { stiffness: 110, damping: 24 };
-const ORIGIN_SPRING = { stiffness: 90, damping: 22 };
+// Zoom dibuat halus: skala naik/turun dengan durasi panjang (ease-in-out, tanpa pantulan) dan titik zoom meluncur
+// mengikuti kursor, tidak melompat. Durasi dibuat panjang karena perbesaran 4x menempuh jarak visual yang jauh.
+const ZOOM_IN_DURATION = 1.4;
+const ZOOM_OUT_DURATION = 1.1;
+// Ease-in-out: mulai pelan, menanjak di tengah, mendarat pelan (ease-out murni terasa mendadak di awal).
+const ZOOM_EASE = [0.65, 0, 0.35, 1] as const;
+const ORIGIN_SPRING = { stiffness: 70, damping: 18 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -64,7 +68,14 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
   const targetY = useMotionValue(0.5);
   const originX = useSpring(targetX, ORIGIN_SPRING);
   const originY = useSpring(targetY, ORIGIN_SPRING);
-  const scale = useSpring(1, SCALE_SPRING);
+  const scale = useMotionValue(1);
+  const scaleAnim = useRef<ReturnType<typeof animate> | null>(null);
+
+  /** Animasikan skala zoom ke nilai tujuan; animasi sebelumnya dihentikan agar tidak saling berebut. */
+  const zoomTo = (value: number, duration: number) => {
+    scaleAnim.current?.stop();
+    scaleAnim.current = animate(scale, value, { duration, ease: ZOOM_EASE });
+  };
 
   /** Perbarui titik zoom dari posisi kursor. `snap`: lompat langsung (saat kursor masuk) agar zoom mulai tepat di kursor. */
   const track = (e: PointerEvent<HTMLDivElement>, snap = false) => {
@@ -92,6 +103,7 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
     dialog.current?.querySelector<HTMLElement>("button")?.focus();
     return () => {
       document.body.style.overflow = "";
+      scaleAnim.current?.stop();
       scale.jump(1); // buka berikutnya selalu mulai tanpa zoom
       (opener.current as HTMLElement | null)?.focus?.();
     };
@@ -169,10 +181,10 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
                 if (!canZoom || e.pointerType !== "mouse") return;
                 track(e, true);
                 setHires(true);
-                scale.set(ZOOM);
+                zoomTo(ZOOM, ZOOM_IN_DURATION);
               }}
               onPointerMove={(e) => canZoom && e.pointerType === "mouse" && track(e)}
-              onPointerLeave={() => scale.set(1)}
+              onPointerLeave={() => zoomTo(1, ZOOM_OUT_DURATION)}
             >
               <AnimatePresence initial={false} custom={dir} mode="popLayout">
                 <motion.div
