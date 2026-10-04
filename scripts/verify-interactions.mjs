@@ -1,6 +1,13 @@
 // Uji interaksi end-to-end terhadap server yang berjalan (default http://localhost:3100).
 // Pakai: node scripts/verify-interactions.mjs
+import { readFileSync } from "node:fs";
 import { chromium } from "playwright";
+
+// Konstanta drag marquee dibaca dari sumbernya agar tes tetap benar saat nilai di-tuning.
+const marqueeSrc = readFileSync("src/components/works/ProjectMarquee.tsx", "utf8");
+const marqueeConst = (name) => Number(marqueeSrc.match(new RegExp(`const ${name} = ([0-9.]+);`))[1]);
+const DRAG_GAIN = marqueeConst("DRAG_GAIN");
+const FOLLOW_TAU = marqueeConst("FOLLOW_TAU");
 
 const base = process.env.BASE ?? "http://localhost:3100";
 const results = [];
@@ -97,13 +104,13 @@ const browser = await chromium.launch();
   }
   await sleep(120); // berhenti sebentar agar tanpa inertia
   await page.mouse.up();
-  await sleep(100);
+  await sleep(1800); // strip mengejar tujuan dengan halus (FOLLOW_TAU); tunggu menetap
   const afterDrag = await translateX(page, trackSel);
   // Drag 400px; ambang 150px menyisakan toleransi untuk timing event pointer di mesin yang sedang sibuk.
-  check("drag marquee menggeser track", Math.abs(afterDrag - before) > 150, `${(afterDrag - before).toFixed(0)} px`);
+  check("drag marquee menggeser track", Math.abs(afterDrag - before) > 400 * DRAG_GAIN * 0.5, `${(afterDrag - before).toFixed(0)} px`);
   check("drag tidak memicu navigasi kartu", new URL(page.url()).pathname === "/");
 
-  // Drag nyata di atas FOTO kartu (tautan): strip harus mengikuti kursor 1:1, tanpa drag-and-drop bawaan browser
+  // Drag nyata di atas FOTO kartu (tautan): jarak strip = 2,5x jarak kursor, tanpa drag-and-drop bawaan browser
   await page.mouse.move(700, 120);
   await sleep(600);
   await page.evaluate(() => {
@@ -111,24 +118,51 @@ const browser = await chromium.launch();
     window.addEventListener("dragstart", () => window.__ev.dragstart++, true);
     window.addEventListener("pointercancel", () => window.__ev.pointercancel++, true);
   });
-  const cardPos = await page.evaluate(() => {
-    const r = [...document.querySelectorAll("section[aria-label='Karya pilihan'] a")].map((el) => el.getBoundingClientRect()).find((b) => b.left > 700 && b.right < 1400 && b.top < 700);
-    return { x: r.left + r.width / 2, y: Math.min(r.top + 150, 800) };
-  });
+  const pickCard = () =>
+    page.evaluate(() => {
+      const r = [...document.querySelectorAll("section[aria-label='Karya pilihan'] a")].map((el) => el.getBoundingClientRect()).find((b) => b.left > 700 && b.right < 1400 && b.top < 700);
+      return { x: r.left + r.width / 2, y: Math.min(r.top + 150, 800) };
+    });
+  const cardPos = await pickCard();
   await page.mouse.move(cardPos.x, cardPos.y);
   await sleep(300);
   const t0 = await translateX(page, trackSel);
   await page.mouse.down();
-  for (let i = 1; i <= 30; i++) {
-    await page.mouse.move(cardPos.x - i * 20, cardPos.y);
-    await sleep(12);
+  for (let i = 1; i <= 15; i++) {
+    await page.mouse.move(cardPos.x - i * 20, cardPos.y); // total 300px
+    await sleep(14);
   }
-  const t1 = await translateX(page, trackSel);
+  await sleep(160); // berhenti sebentar sebelum dilepas agar tanpa inertia
   await page.mouse.up();
+  await sleep(1400); // strip mengejar tujuan dengan halus; tunggu menetap
+  const t1 = await translateX(page, trackSel);
   const dragEv = await page.evaluate(() => window.__ev);
-  check("drag di atas foto kartu: strip mengikuti kursor 1:1 (600px)", Math.abs(Math.abs(t1 - t0) - 600) < 40, `strip bergeser ${(t1 - t0).toFixed(0)}px`);
+  const dragTravel = Math.abs(t1 - t0);
+  check(`drag di atas foto kartu: strip menempuh ${DRAG_GAIN}x jarak kursor (300px -> ~${300 * DRAG_GAIN}px)`, // Toleransi 15% + 40px: marquee tetap berjalan pelan (hover 25% ~ 12px/dtk) selama ~1,8 dtk pengujian.
+  Math.abs(dragTravel - 300 * DRAG_GAIN) < 300 * DRAG_GAIN * 0.15 + 40, `strip bergeser ${(t1 - t0).toFixed(0)}px`);
   check("drag di atas foto kartu: tanpa dragstart/pointercancel bawaan browser", dragEv.dragstart === 0 && dragEv.pointercancel === 0, JSON.stringify(dragEv));
-  await sleep(1500);
+  await sleep(800);
+
+  // Gerakan halus: satu lompatan kursor 200px tidak membuat strip melompat seketika, melainkan mengejar bertahap
+  const cardPos2 = await pickCard();
+  await page.mouse.move(cardPos2.x, cardPos2.y);
+  await sleep(300);
+  const sm0 = await translateX(page, trackSel);
+  await page.mouse.down();
+  await page.mouse.move(cardPos2.x - 200, cardPos2.y);
+  await sleep(40);
+  const sEarly = await translateX(page, trackSel);
+  await sleep(100);
+  const sMid = await translateX(page, trackSel);
+  await sleep(Math.max(1300, FOLLOW_TAU * 5));
+  const sFinal = await translateX(page, trackSel);
+  await page.mouse.up();
+  const early = Math.abs(sEarly - sm0);
+  const mid = Math.abs(sMid - sm0);
+  const final = Math.abs(sFinal - sm0);
+  check("gerakan halus: strip tidak melompat seketika (40ms < 50% tujuan)", early > 0 && early < final * 0.5, `40ms ${early.toFixed(0)}px, 140ms ${mid.toFixed(0)}px, akhir ${final.toFixed(0)}px`);
+  check(`gerakan halus: bertahap menuju tujuan ${200 * DRAG_GAIN}px (200px x ${DRAG_GAIN})`, mid > early && mid < final && Math.abs(final - 200 * DRAG_GAIN) < 200 * DRAG_GAIN * 0.15, `akhir ${final.toFixed(0)}px`);
+  await sleep(2500);
 
   // Marquee: flick (drag cepat lalu lepas) menimbulkan inertia: lebih cepat dari kecepatan otomatis
   await page.mouse.move(1100, 700);
@@ -142,6 +176,17 @@ const browser = await chromium.launch();
   await sleep(150);
   const f1 = await translateX(page, trackSel);
   check("flick memberi inertia (lebih cepat dari otomatis)", Math.abs(f1 - f0) / 0.15 > 120, `${(Math.abs(f1 - f0) / 0.15).toFixed(0)} px/s`);
+  // Setelah dilepas, strip terus meluncur lalu melambat bertahap (tidak berhenti mendadak)
+  const g0 = await translateX(page, trackSel);
+  await sleep(300);
+  const g1 = await translateX(page, trackSel);
+  await sleep(1000);
+  const g2 = await translateX(page, trackSel);
+  await sleep(300);
+  const g3 = await translateX(page, trackSel);
+  const v1 = Math.abs(g1 - g0) / 0.3;
+  const v2 = Math.abs(g3 - g2) / 0.3;
+  check("inertia meluruh halus (kecepatan 0,3-0,6 dtk > kecepatan 1,6-1,9 dtk)", v1 > v2 * 1.5 && v1 > 100, `${v1.toFixed(0)} px/s -> ${v2.toFixed(0)} px/s`);
 
   // Hover kartu marquee: scale 0.9
   await page.mouse.move(700, 120);

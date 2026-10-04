@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from "motion/react";
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useReducedMotion,
+} from "motion/react";
 import { useRef, type PointerEvent } from "react";
 import type { ProjectCardData } from "@/content/projects";
 import { ProjectCard } from "./ProjectCard";
@@ -14,33 +19,40 @@ const SIZES = "(min-width: 1200px) 22vw, (min-width: 810px) 30vw, 68vw";
 const HOVER_SPEED_FACTOR = 0.25;
 // Geser lebih dari ini (px) dianggap drag, bukan klik.
 const DRAG_THRESHOLD = 5;
-// Peluruhan inertia setelah drag dilepas (ms, konstanta waktu).
-const INERTIA_DECAY = 350;
+// Jarak drag: strip bergerak sekian kali jarak geser kursor, jadi drag pendek sudah menempuh jarak jauh.
+const DRAG_GAIN = 0.5;
+// Strip mengejar posisi tujuan secara halus (konstanta waktu, ms). Makin besar makin lembut/lambat mengikuti.
+const FOLLOW_TAU = 300;
+// Peluruhan inertia setelah drag dilepas (ms, konstanta waktu). Makin besar makin panjang meluncur.
+const INERTIA_DECAY = 450;
+// Batas kecepatan inertia (px/detik, setelah dikali DRAG_GAIN).
+const MAX_INERTIA = 5000;
 
 /**
  * Ticker proyek (Framer Ticker referensi, tickerEffectDraggable = true):
  * - Bergerak terus ke kiri pada 50px/detik (desktop) / 30px/detik (mobile).
  * - Hover: melambat halus ke 25%.
- * - Drag/swipe ke kiri atau kanan menggeser langsung; saat dilepas ada inertia sehingga flick membuat
- *   slideshow melaju lebih cepat, lalu kembali ke kecepatan otomatis. Swipe vertikal tetap men-scroll halaman.
+ * - Drag/swipe ke kiri atau kanan: strip menempuh DRAG_GAIN kali jarak kursor dan mengejar posisinya dengan
+ *   pelan-pelan (tidak melompat). Saat dilepas, kecepatan terakhir diteruskan sebagai inertia yang meluruh halus,
+ *   lalu kembali ke kecepatan otomatis. Swipe vertikal tetap men-scroll halaman.
  * Daftar digandakan agar loop mulus. Dengan reduced-motion: carousel scroll horizontal biasa.
  */
 export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
   const reduced = useReducedMotion();
   const track = useRef<HTMLUListElement>(null);
   const x = useMotionValue(0);
+  const targetX = useRef(0); // posisi tujuan; x mengejarnya dengan halus
   const hovered = useRef(false);
   const factor = useRef(1); // 1 = kecepatan penuh, diinterpolasi ke 0.25 saat hover
 
-  const drag = useRef({ active: false, moved: 0, lastX: 0, lastT: 0, velocity: 0 }); // velocity px/detik
-  const inertia = useRef(0); // px/detik, meluruh setelah drag dilepas
-
-  const wrap = (value: number, loop: number) => {
-    let v = value;
-    while (v > 0) v -= loop;
-    while (v <= -loop) v += loop;
-    return v;
-  };
+  const drag = useRef({
+    active: false,
+    moved: 0,
+    lastX: 0,
+    lastT: 0,
+    velocity: 0,
+  }); // velocity px/detik (kursor)
+  const inertia = useRef(0); // px/detik (posisi strip), meluruh setelah drag dilepas
 
   useAnimationFrame((_, delta) => {
     const el = track.current;
@@ -48,52 +60,77 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
     const dt = Math.min(delta, 64);
     const loop = (el.scrollWidth + GAP) / 2; // satu set kartu + satu gap
 
-    if (drag.current.active) return; // posisi dikendalikan pointer
+    if (!drag.current.active) {
+      const hoverTarget = hovered.current ? HOVER_SPEED_FACTOR : 1;
+      factor.current += (hoverTarget - factor.current) * Math.min(1, dt / 180);
+      const auto = -(window.innerWidth >= 1024 ? 50 : 30) * factor.current;
 
-    const target = hovered.current ? HOVER_SPEED_FACTOR : 1;
-    factor.current += (target - factor.current) * Math.min(1, dt / 180);
-    const auto = -(window.innerWidth >= 1024 ? 50 : 30) * factor.current;
+      inertia.current *= Math.exp(-dt / INERTIA_DECAY);
+      if (Math.abs(inertia.current) < 1) inertia.current = 0;
 
-    inertia.current *= Math.exp(-dt / INERTIA_DECAY);
-    if (Math.abs(inertia.current) < 1) inertia.current = 0;
+      targetX.current += ((auto + inertia.current) * dt) / 1000;
+    }
 
-    x.set(wrap(x.get() + ((auto + inertia.current) * dt) / 1000, loop));
+    // x mengejar tujuan dengan halus (eksponensial), bukan langsung melompat.
+    let cur = x.get();
+    cur += (targetX.current - cur) * (1 - Math.exp(-dt / FOLLOW_TAU));
+
+    // Loop mulus: geser x dan tujuan bersama-sama agar selisihnya tetap.
+    while (cur > 0) {
+      cur -= loop;
+      targetX.current -= loop;
+    }
+    while (cur <= -loop) {
+      cur += loop;
+      targetX.current += loop;
+    }
+    x.set(cur);
   });
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
-    drag.current = { active: true, moved: 0, lastX: e.clientX, lastT: performance.now(), velocity: 0 };
+    drag.current = {
+      active: true,
+      moved: 0,
+      lastX: e.clientX,
+      lastT: performance.now(),
+      velocity: 0,
+    };
     inertia.current = 0;
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
-    const el = track.current;
-    if (!d.active || !el) return;
+    if (!d.active) return;
     const dx = e.clientX - d.lastX;
     const now = performance.now();
     const dtMs = Math.max(1, now - d.lastT);
     d.moved += Math.abs(dx);
-    // Kecepatan dihaluskan agar flick terakhir yang menentukan inertia.
-    d.velocity = d.velocity * 0.6 + ((dx / dtMs) * 1000) * 0.4;
+    // Kecepatan dihaluskan agar gerakan terakhir sebelum dilepas yang menentukan inertia.
+    d.velocity = d.velocity * 0.6 + (dx / dtMs) * 1000 * 0.4;
     d.lastX = e.clientX;
     d.lastT = now;
-    x.set(wrap(x.get() + dx, (el.scrollWidth + GAP) / 2));
+    targetX.current += dx * DRAG_GAIN;
   };
 
   const endDrag = (e: PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     if (!d.active) return;
     d.active = false;
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId);
     // Hanya beri inertia bila pointer masih bergerak saat dilepas (bukan berhenti dulu sebelum lepas).
-    inertia.current = performance.now() - d.lastT < 80 ? Math.max(-3000, Math.min(3000, d.velocity)) : 0;
+    const v = performance.now() - d.lastT < 80 ? d.velocity * DRAG_GAIN : 0;
+    inertia.current = Math.max(-MAX_INERTIA, Math.min(MAX_INERTIA, v));
   };
 
   if (reduced) {
     return (
-      <ul className="container-site flex snap-x gap-4 overflow-x-auto pb-4" aria-label="Karya pilihan">
+      <ul
+        className="container-site flex snap-x gap-4 overflow-x-auto pb-4"
+        aria-label="Karya pilihan"
+      >
         {items.map((p) => (
           <li key={p.slug} className={`${CARD_WIDTH} snap-start`}>
             <ProjectCard project={p} sizes={SIZES} />
@@ -129,12 +166,25 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
         }
       }}
     >
-      <motion.ul ref={track} style={{ x, gap: GAP }} className="flex w-max py-2">
+      <motion.ul
+        ref={track}
+        style={{ x, gap: GAP }}
+        className="flex w-max py-2"
+      >
         {[...items, ...items].map((p, i) => {
           const decorative = i >= items.length;
           return (
-            <li key={`${p.slug}-${i}`} className={CARD_WIDTH} aria-hidden={decorative || undefined}>
-              <ProjectCard project={p} sizes={SIZES} priority={i < 4} decorative={decorative} />
+            <li
+              key={`${p.slug}-${i}`}
+              className={CARD_WIDTH}
+              aria-hidden={decorative || undefined}
+            >
+              <ProjectCard
+                project={p}
+                sizes={SIZES}
+                priority={i < 4}
+                decorative={decorative}
+              />
             </li>
           );
         })}
