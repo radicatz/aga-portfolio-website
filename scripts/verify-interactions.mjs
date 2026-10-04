@@ -226,7 +226,7 @@ const browser = await chromium.launch();
   check("tab Works: garis hover sejajar separator", tabGeo.afterWidth > 20 && Math.abs(tabGeo.ulBottom - tabGeo.linkBottom - 1) < 0.6, `selisih ${(tabGeo.ulBottom - tabGeo.linkBottom).toFixed(2)}px`);
 
   // Pemisah abu-abu di atas CTA footer "Mari Abadikan Cerita Anda" harus ada di semua halaman
-  const sepRoutes = ["/", "/works", "/works/food", "/about", "/experience", "/services", "/contact", "/tidak-ada"];
+  const sepRoutes = ["/", "/works", "/works/food", "/about", "/experience", "/services", "/tidak-ada"];
   const noSeparator = [];
   for (const r of sepRoutes) {
     await page.goto(base + r, { waitUntil: "networkidle" });
@@ -234,6 +234,17 @@ const browser = await chromium.launch();
     if (w !== "1px") noSeparator.push(`${r}:${w}`);
   }
   check(`pemisah abu-abu di atas CTA footer di ${sepRoutes.length} halaman`, noSeparator.length === 0, noSeparator.join(", "));
+
+  // /contact: tanpa CTA "Mari Abadikan Cerita Anda" dan tanpa pemisah CTA
+  await page.goto(base + "/contact", { waitUntil: "networkidle" });
+  await sleep(1200);
+  const contactCta = await page.evaluate(() => ({
+    cta: document.querySelectorAll("footer a[data-hide-fab]").length,
+    rule: document.querySelectorAll("footer [data-footer-rule]").length,
+    text: document.body.innerText.includes("Mari Abadikan"),
+    links: document.querySelectorAll("footer .grid a").length,
+  }));
+  check("contact: tanpa CTA 'Mari Abadikan Cerita Anda'", contactCta.cta === 0 && contactCta.rule === 0 && !contactCta.text && contactCta.links > 0, `cta ${contactCta.cta}, teks ${contactCta.text}, tautan footer ${contactCta.links}`);
 
   // Konten terakhir tidak boleh menempel ke pemisah footer: jarak >= 100px di halaman yang berakhir dengan grid/daftar
   const gapRoutes = ["/", "/works", "/works/food", "/works/street", "/services", "/contact", "/about", "/experience"];
@@ -298,6 +309,33 @@ const browser = await chromium.launch();
   check("lightbox: judul + cerita proyek di panel", text.includes("Omakase & Sake") && text.includes("Seri untuk sebuah restoran Jepang"));
   check("counter 01 / 16", text.includes("01 / 16"));
 
+  // Tata letak slideshow: foto menempati seluruh kolom kiri; semua kontrol ada di panel kanan
+  const lay = await page.evaluate(() => {
+    const d = document.querySelector("[role=dialog]");
+    const stage = d.querySelector("[data-zoom-stage]").getBoundingClientRect();
+    const rect = (el) => el.getBoundingClientRect();
+    const counter = [...d.querySelectorAll("span")].find((el) => /\d\d \/ \d\d/.test(el.textContent));
+    const byName = (n) => [...d.querySelectorAll("button")].find((b) => b.getAttribute("aria-label") === n || b.textContent.trim() === n);
+    return {
+      stage: { left: stage.left, right: stage.right, top: stage.top, bottom: stage.bottom, width: stage.width },
+      counterLeft: rect(counter).left,
+      closeLeft: rect(byName("TUTUP")).left,
+      prevLeft: rect(byName("SEBELUMNYA")).left,
+      nextLeft: rect(byName("SELANJUTNYA")).left,
+      vw: window.innerWidth,
+      vh: window.innerHeight,
+    };
+  });
+  check("slideshow: foto mengisi seluruh tinggi layar", Math.abs(lay.stage.top) < 1 && Math.abs(lay.stage.bottom - lay.vh) < 1, `top ${lay.stage.top}, bottom ${lay.stage.bottom} / ${lay.vh}`);
+  const closeText = await page.evaluate(() => [...document.querySelectorAll("[role=dialog] button")].find((b) => b.textContent.trim() === "TUTUP")?.textContent.trim() ?? null);
+  check("slideshow: tombol tutup berupa teks TUTUP", closeText === "TUTUP", String(closeText));
+  check("slideshow: foto menempati >= 65% lebar layar", lay.stage.width / lay.vw >= 0.65, `${((lay.stage.width / lay.vw) * 100).toFixed(0)}%`);
+  check(
+    "slideshow: counter, tutup, sebelumnya, selanjutnya ada di panel kanan",
+    [lay.counterLeft, lay.closeLeft, lay.prevLeft, lay.nextLeft].every((x) => x >= lay.stage.right - 1),
+    `kolom foto berakhir di ${lay.stage.right.toFixed(0)}px; kontrol mulai di ${[lay.counterLeft, lay.closeLeft, lay.prevLeft, lay.nextLeft].map((x) => x.toFixed(0)).join("/")}`,
+  );
+
   // Zoom detail di slideshow: hover mouse memperbesar foto, titik zoom mengikuti kursor
   const stage = dialog.locator("[data-zoom-stage]");
   const sb = await stage.boundingBox();
@@ -307,7 +345,7 @@ const browser = await chromium.launch();
       const m = getComputedStyle(el).transform;
       return m === "none" ? 1 : new DOMMatrix(m).a;
     });
-  await page.mouse.move(5, 5);
+  await page.mouse.move(1400, 450); // di panel kanan, di luar panggung foto
   await sleep(2600); // kursor sempat berada di atas panggung saat lightbox terbuka; beri waktu spring kembali ke 1x
   check("slideshow zoom: normal 1x sebelum hover", Math.abs((await zoomScale()) - 1) < 0.02);
   await page.mouse.move(sb.x + sb.width * 0.4, sb.y + sb.height * 0.4);
@@ -323,7 +361,7 @@ const browser = await chromium.launch();
   check("slideshow zoom: titik zoom mengikuti kursor", o1 !== o2, `${o1} -> ${o2}`);
   check("slideshow zoom: titik zoom meluncur halus (tidak melompat)", oMid !== o1 && oMid !== o2, `tengah ${oMid}`);
   check("slideshow zoom: memuat resolusi tinggi saat hover", (await dialog.locator("img").last().getAttribute("sizes")) === "2400px");
-  await page.mouse.move(5, 5);
+  await page.mouse.move(1400, 450); // di panel kanan, di luar panggung foto
   await sleep(2400);
   check("slideshow zoom: kembali 1x saat kursor keluar", Math.abs((await zoomScale()) - 1) < 0.05, `${(await zoomScale()).toFixed(2)}x`);
 
@@ -448,7 +486,27 @@ const browser = await chromium.launch();
 
   await page.goto(base + "/contact", { waitUntil: "networkidle" });
   await sleep(2200);
-  check("FAB tersembunyi saat blok kontak terlihat", (await page.getByRole("link", { name: "Chat dengan Aga via WhatsApp" }).count()) === 0);
+  const contactFab = page.getByRole("link", { name: "Chat dengan Aga via WhatsApp" });
+  check("contact: tombol WhatsApp sticky tetap tampil", (await contactFab.count()) === 1 && (await contactFab.isVisible()));
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await sleep(1200);
+  check("contact: tombol WhatsApp sticky tetap tampil di dasar halaman", (await contactFab.count()) === 1 && (await contactFab.isVisible()));
+  // Di dasar halaman, tombol sticky tidak boleh menutupi teks footer (hak cipta + atribusi ikon)
+  const overlap = await page.evaluate(() => {
+    const fab = document.querySelector("a[aria-label='Chat dengan Aga via WhatsApp']").getBoundingClientRect();
+    const hit = [...document.querySelectorAll("footer p, footer a, footer span")].filter((el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && r.left < fab.right && r.right > fab.left && r.top < fab.bottom && r.bottom > fab.top;
+    });
+    return hit.map((el) => el.textContent.trim().slice(0, 30));
+  });
+  check("dasar halaman: tombol WhatsApp tidak menutupi teks footer", overlap.length === 0, overlap.join(" | "));
+  // Di halaman lain, FAB tetap tersembunyi saat CTA footer terlihat
+  await page.goto(base + "/about", { waitUntil: "networkidle" });
+  await sleep(1800);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await sleep(1500);
+  check("halaman lain: FAB tersembunyi saat CTA footer terlihat", (await page.getByRole("link", { name: "Chat dengan Aga via WhatsApp" }).count()) === 0);
 
   check("tanpa error console", errors.length === 0, errors.slice(0, 2).join(" | "));
   await ctx.close();

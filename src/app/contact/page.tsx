@@ -22,8 +22,7 @@ export default function ContactPage() {
         <p className="text-body mt-8 max-w-xl text-muted">{contact.text}</p>
       </Reveal>
 
-      {/* data-hide-fab: tombol WhatsApp sticky disembunyikan saat blok ini terlihat */}
-      <div data-hide-fab className="mt-14 border-t border-line/15 md:mt-20">
+      <div className="mt-14 border-t border-line/15 md:mt-20">
         <Reveal>
           <dl className="grid md:grid-cols-12">
             <div className="grid gap-2 border-b border-line/15 py-8 md:col-span-12 md:grid-cols-12 md:gap-6">

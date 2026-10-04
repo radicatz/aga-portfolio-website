@@ -8,7 +8,7 @@ import { springSoft } from "@/lib/motion";
 
 /**
  * Tombol WhatsApp sticky di semua halaman. Bergaya situs (monokrom --fg/--bg), bukan hijau WhatsApp.
- * Muncul setelah scroll 200px atau 1,5 detik; sembunyi saat elemen [data-hide-fab] (Footer CTA, blok kontak) terlihat.
+ * Muncul setelah scroll 200px atau 1,5 detik; sembunyi saat elemen [data-hide-fab] (Footer CTA) terlihat. Di /contact tetap tampil (CTA footer disembunyikan di sana).
  */
 export function WhatsAppFab() {
   const pathname = usePathname();

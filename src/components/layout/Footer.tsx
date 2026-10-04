@@ -1,17 +1,15 @@
 import { HoverLine } from "@/components/ui/HoverLine";
 import { site } from "@/content/site";
-import { FooterCTA } from "./FooterCTA";
+import { FooterCTASection } from "./FooterCTASection";
 
 export function Footer() {
   const { contact } = site;
 
+  // pb-20 pada <footer>: ruang di bawah agar baris hak cipta/atribusi bisa digulir melewati tombol WhatsApp sticky
   return (
-    <footer>
+    <footer className="pb-20">
       <div className="container-site">
-        {/* Pemisah atas CTA berada di dalam container agar selebar pemisah di bawahnya (bukan selebar layar) */}
-        <div data-footer-rule className="border-t border-line/15">
-          <FooterCTA />
-        </div>
+        <FooterCTASection />
 
         <div className="grid gap-10 border-t border-line/15 py-10 text-label md:grid-cols-3">
           <ul className="flex flex-col gap-3">

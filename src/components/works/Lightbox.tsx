@@ -49,7 +49,8 @@ const useFinePointer = () =>
   useSyncExternalStore(subscribeFinePointer, () => window.matchMedia(FINE_POINTER).matches, () => false);
 
 /**
- * Lightbox layar penuh (mengikuti .context/design/gallery.png): kiri foto + kontrol, kanan judul dan cerita proyek.
+ * Lightbox layar penuh (mengikuti .context/design/gallery.png): kiri foto selebar-lebarnya, kanan panel berisi counter,
+ * tombol tutup, judul + cerita proyek, dan tombol sebelumnya/selanjutnya (supaya foto dapat tampil maksimal).
  * Esc menutup, panah/swipe berpindah dengan animasi geser, fokus terkunci dan dikembalikan saat ditutup.
  * Hover mouse pada foto memperbesarnya (zoom detail seperti halaman produk): titik zoom mengikuti kursor dan
  * versi resolusi tinggi dimuat saat hover pertama. Reduced-motion menonaktifkan zoom.
@@ -148,88 +149,88 @@ export function Lightbox({ images, index, onChange, title, story }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-surface lg:grid lg:grid-cols-[1fr_minmax(340px,32%)] lg:overflow-hidden"
+          className="fixed inset-0 z-50 overflow-y-auto bg-surface lg:grid lg:grid-cols-[1fr_minmax(340px,32%)] lg:grid-rows-[auto_minmax(0,1fr)_auto] lg:overflow-hidden"
         >
-          {/* Kolom foto */}
-          <div className="flex flex-col lg:h-dvh">
-            <div className="flex items-center justify-between px-4 py-5 text-label md:px-6">
-              <span aria-live="polite">
-                {pad((index ?? 0) + 1)} {lightbox.counterOf} {pad(images.length)}
-              </span>
-              <button type="button" onClick={() => onChange(null)} className="hover-line">
-                {lightbox.close}
-              </button>
-            </div>
-
-            <motion.div
-              data-zoom-stage
-              className={`relative h-[62dvh] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1 ${
-                canZoom ? "cursor-zoom-in" : "cursor-grab active:cursor-grabbing"
-              }`}
-              initial={{ scale: 0.96 }}
-              animate={{ scale: 1 }}
-              transition={springText}
-              // Swipe untuk berpindah foto hanya di layar sentuh; dengan mouse, hover dipakai untuk zoom.
-              drag={canZoom ? false : "x"}
-              dragSnapToOrigin
-              dragElastic={0.2}
-              onDragEnd={(_, info) => {
-                if (info.offset.x < -80) go(1);
-                else if (info.offset.x > 80) go(-1);
-              }}
-              onPointerEnter={(e) => {
-                if (!canZoom || e.pointerType !== "mouse") return;
-                track(e, true);
-                setHires(true);
-                zoomTo(ZOOM, ZOOM_IN_DURATION);
-              }}
-              onPointerMove={(e) => canZoom && e.pointerType === "mouse" && track(e)}
-              onPointerLeave={() => zoomTo(1, ZOOM_OUT_DURATION)}
-            >
-              <AnimatePresence initial={false} custom={dir} mode="popLayout">
-                <motion.div
-                  key={index}
-                  custom={dir}
-                  variants={slide}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={springText}
-                  className="absolute inset-0"
-                >
-                  {/* Lapisan zoom: terpisah dari animasi geser agar keduanya tidak saling menimpa */}
-                  <motion.div data-zoom-layer className="absolute inset-0" style={{ originX, originY, scale }}>
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      // Setelah hover pertama, minta kandidat resolusi tertinggi agar detail tetap tajam saat diperbesar.
-                      sizes={hires ? "2400px" : "(min-width: 1024px) 66vw, 100vw"}
-                      className="object-contain p-2 md:p-6"
-                      draggable={false}
-                      priority
-                    />
-                  </motion.div>
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-
-            {images.length > 1 && (
-              <div className="flex items-center justify-between px-4 py-5 text-label md:px-6">
-                <button type="button" onClick={() => go(-1)} className="hover-line group inline-flex items-center gap-3" aria-label={lightbox.previous}>
-                  <Icon name="arrow-left" className="size-5" />
-                  {lightbox.previous}
-                </button>
-                <button type="button" onClick={() => go(1)} className="hover-line group inline-flex items-center gap-3" aria-label={lightbox.next}>
-                  {lightbox.next}
-                  <Icon name="arrow-right" className="size-5" />
-                </button>
-              </div>
-            )}
+          {/* Atas: counter + tutup (di desktop berada di panel kanan) */}
+          <div className="flex items-center justify-between px-4 py-5 text-label md:px-6 lg:col-start-2 lg:row-start-1 lg:border-l lg:border-line/15">
+            <span aria-live="polite">
+              {pad((index ?? 0) + 1)} {lightbox.counterOf} {pad(images.length)}
+            </span>
+            <button type="button" onClick={() => onChange(null)} className="hover-line">
+              {lightbox.close}
+            </button>
           </div>
 
-          {/* Panel cerita */}
-          <aside className="border-t border-line/15 px-4 pb-10 pt-8 md:px-6 lg:h-dvh lg:overflow-y-auto lg:border-l lg:border-t-0 lg:pt-6">
+          {/* Foto: mengisi seluruh tinggi dan lebar kolom kiri di desktop */}
+        <motion.div
+          data-zoom-stage
+          className={`relative h-[62dvh] overflow-hidden lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:h-auto lg:min-h-0 ${
+            canZoom ? "cursor-zoom-in" : "cursor-grab active:cursor-grabbing"
+          }`}
+          initial={{ scale: 0.96 }}
+          animate={{ scale: 1 }}
+          transition={springText}
+          // Swipe untuk berpindah foto hanya di layar sentuh; dengan mouse, hover dipakai untuk zoom.
+          drag={canZoom ? false : "x"}
+          dragSnapToOrigin
+          dragElastic={0.2}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -80) go(1);
+            else if (info.offset.x > 80) go(-1);
+          }}
+          onPointerEnter={(e) => {
+            if (!canZoom || e.pointerType !== "mouse") return;
+            track(e, true);
+            setHires(true);
+            zoomTo(ZOOM, ZOOM_IN_DURATION);
+          }}
+          onPointerMove={(e) => canZoom && e.pointerType === "mouse" && track(e)}
+          onPointerLeave={() => zoomTo(1, ZOOM_OUT_DURATION)}
+        >
+          <AnimatePresence initial={false} custom={dir} mode="popLayout">
+            <motion.div
+              key={index}
+              custom={dir}
+              variants={slide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={springText}
+              className="absolute inset-0"
+            >
+              {/* Lapisan zoom: terpisah dari animasi geser agar keduanya tidak saling menimpa */}
+              <motion.div data-zoom-layer className="absolute inset-0" style={{ originX, originY, scale }}>
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  // Setelah hover pertama, minta kandidat resolusi tertinggi agar detail tetap tajam saat diperbesar.
+                  sizes={hires ? "2400px" : "(min-width: 1024px) 66vw, 100vw"}
+                  className="object-contain p-2 md:p-4"
+                  draggable={false}
+                  priority
+                />
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+
+          {/* Bawah: sebelumnya / selanjutnya (di desktop berada di dasar panel kanan) */}
+          {images.length > 1 && (
+            <div className="flex items-center justify-between px-4 py-5 text-label md:px-6 lg:col-start-2 lg:row-start-3 lg:border-l lg:border-line/15">
+              <button type="button" onClick={() => go(-1)} className="hover-line group inline-flex items-center gap-3" aria-label={lightbox.previous}>
+                <Icon name="arrow-left" className="size-5" />
+                {lightbox.previous}
+              </button>
+              <button type="button" onClick={() => go(1)} className="hover-line group inline-flex items-center gap-3" aria-label={lightbox.next}>
+                {lightbox.next}
+                <Icon name="arrow-right" className="size-5" />
+              </button>
+            </div>
+          )}
+
+          {/* Cerita proyek (panel kanan, di antara kontrol atas dan bawah) */}
+          <aside className="border-t border-line/15 px-4 pb-10 pt-8 md:px-6 lg:col-start-2 lg:row-start-2 lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:pb-6 lg:pt-6">
             <p className="text-heading">{title}</p>
             <div className="mt-8 space-y-4">
               {story.map((p) => (
