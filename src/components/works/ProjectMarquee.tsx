@@ -47,6 +47,9 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
 
   const drag = useRef({
     active: false,
+    // Pointer capture baru dipasang setelah gerakan melewati DRAG_THRESHOLD. Bila dipasang saat mouse-down,
+    // browser mengirim "click" ke kontainer (bukan ke tautan di bawah kursor), sehingga kartu tidak bisa diklik.
+    captured: false,
     moved: 0,
     lastX: 0,
     lastT: 0,
@@ -91,13 +94,13 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     drag.current = {
       active: true,
+      captured: false,
       moved: 0,
       lastX: e.clientX,
       lastT: performance.now(),
       velocity: 0,
     };
     inertia.current = 0;
-    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -107,6 +110,11 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
     const now = performance.now();
     const dtMs = Math.max(1, now - d.lastT);
     d.moved += Math.abs(dx);
+    // Sudah jelas drag (bukan klik): tangkap pointer agar drag tetap berjalan walau kursor keluar dari kontainer.
+    if (!d.captured && d.moved > DRAG_THRESHOLD) {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      d.captured = true;
+    }
     // Kecepatan dihaluskan agar gerakan terakhir sebelum dilepas yang menentukan inertia.
     d.velocity = d.velocity * 0.6 + (dx / dtMs) * 1000 * 0.4;
     d.lastX = e.clientX;
@@ -118,8 +126,9 @@ export function ProjectMarquee({ items }: { items: ProjectCardData[] }) {
     const d = drag.current;
     if (!d.active) return;
     d.active = false;
-    if (e.currentTarget.hasPointerCapture(e.pointerId))
+    if (d.captured && e.currentTarget.hasPointerCapture(e.pointerId))
       e.currentTarget.releasePointerCapture(e.pointerId);
+    d.captured = false;
     // Hanya beri inertia bila pointer masih bergerak saat dilepas (bukan berhenti dulu sebelum lepas).
     const v = performance.now() - d.lastT < 80 ? d.velocity * DRAG_GAIN : 0;
     inertia.current = Math.max(-MAX_INERTIA, Math.min(MAX_INERTIA, v));

@@ -79,6 +79,46 @@ const browser = await chromium.launch();
   });
   check("jarak marquee -> 'Jelajahi per kategori' >= 100px", gap >= 100, `${gap.toFixed(0)}px`);
 
+  // Setiap thumbnail marquee bisa diklik dan membuka halaman detail proyeknya (regresi: pointer capture menelan klik)
+  const clickFailures = [];
+  for (const n of [1, 2, 3, 4]) {
+    await page.goto(base + "/", { waitUntil: "networkidle" });
+    await sleep(1300);
+    const target = await page.evaluate((n) => {
+      const cards = [...document.querySelectorAll("section[aria-label='Karya pilihan'] a")]
+        .map((a) => ({ href: a.getAttribute("href"), r: a.getBoundingClientRect() }))
+        .filter((c) => c.r.left > 100 && c.r.right < window.innerWidth - 100 && c.r.top < 700);
+      const c = cards[(n - 1) % cards.length];
+      return { href: c.href, x: c.r.left + c.r.width / 2, y: Math.min(c.r.top + 160, 820) };
+    }, n);
+    await page.mouse.move(target.x, target.y);
+    await sleep(200);
+    await page.mouse.down();
+    await page.mouse.up();
+    await sleep(1400);
+    const landed = new URL(page.url()).pathname;
+    if (landed !== target.href) clickFailures.push(`${target.href} -> ${landed}`);
+  }
+  check("klik thumbnail marquee membuka halaman detail proyek (4 kartu)", clickFailures.length === 0, clickFailures.join(" | "));
+  // Klik kecil dengan sedikit gerak (< 5px) tetap dianggap klik, bukan drag
+  await page.goto(base + "/", { waitUntil: "networkidle" });
+  await sleep(1300);
+  const jitter = await page.evaluate(() => {
+    const c = [...document.querySelectorAll("section[aria-label='Karya pilihan'] a")]
+      .map((a) => ({ href: a.getAttribute("href"), r: a.getBoundingClientRect() }))
+      .find((c) => c.r.left > 100 && c.r.right < window.innerWidth - 100 && c.r.top < 700);
+    return { href: c.href, x: c.r.left + c.r.width / 2, y: Math.min(c.r.top + 160, 820) };
+  });
+  await page.mouse.move(jitter.x, jitter.y);
+  await sleep(200);
+  await page.mouse.down();
+  await page.mouse.move(jitter.x - 3, jitter.y + 1);
+  await page.mouse.up();
+  await sleep(1400);
+  check("klik dengan sedikit gerak (3px) tetap membuka proyek", new URL(page.url()).pathname === jitter.href, new URL(page.url()).pathname);
+  await page.goto(base + "/", { waitUntil: "networkidle" });
+  await sleep(1300);
+
   // Marquee: kecepatan normal vs hover (25%)
   const trackSel = "section[aria-label='Karya pilihan'] ul";
   await sleep(1200);
@@ -621,6 +661,24 @@ const browser = await chromium.launch();
       .map((el) => el.textContent.trim().slice(0, 30));
   });
   check("mobile: tombol WhatsApp tidak menutupi teks footer di dasar halaman", mobileOverlap.length === 0, mobileOverlap.join(" | "));
+
+  // Mobile: ketuk thumbnail marquee membuka halaman detail proyek
+  await page.goto(base + "/", { waitUntil: "networkidle" });
+  await sleep(1300);
+  const tapTarget = await page.evaluate(() => {
+    const c = [...document.querySelectorAll("section[aria-label='Karya pilihan'] a")]
+      .map((a) => ({ href: a.getAttribute("href"), r: a.getBoundingClientRect() }))
+      .find((c) => {
+        const cx = Math.max(c.r.left, 0) + (Math.min(c.r.right, window.innerWidth) - Math.max(c.r.left, 0)) / 2;
+        return cx > 60 && cx < window.innerWidth - 60 && Math.min(c.r.right, window.innerWidth) - Math.max(c.r.left, 0) > 120 && c.r.top > 0 && c.r.top < 600;
+      });
+    const vis = { l: Math.max(c.r.left, 0), r: Math.min(c.r.right, window.innerWidth) };
+    return { href: c.href, x: vis.l + (vis.r - vis.l) / 2, y: Math.min(c.r.top + 120, 700) };
+  });
+  await page.touchscreen.tap(tapTarget.x, tapTarget.y);
+  await sleep(1500);
+  check("mobile: ketuk thumbnail marquee membuka halaman detail proyek", new URL(page.url()).pathname === tapTarget.href, `${tapTarget.href} -> ${new URL(page.url()).pathname}`);
+  await page.goto(base + "/", { waitUntil: "networkidle" });
 
   // Marquee mobile: touch-action pan-y agar swipe horizontal men-drag dan vertikal tetap scroll
   await page.goto(base + "/", { waitUntil: "networkidle" });

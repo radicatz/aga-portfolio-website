@@ -63,6 +63,7 @@ Status: `[ ]` belum · `[~]` sedang · `[x]` selesai. Perbarui di akhir setiap t
 - [x] Ikon X Guidance untuk tombol tutup dicoba lalu dibatalkan (user lebih suka teks "TUTUP")
 - [x] Marquee: drag-to-scroll diperbaiki. Penyebabnya drag-and-drop tautan bawaan browser (dragstart + pointercancel) yang memutus drag setelah beberapa piksel; kini `draggable=false` pada tautan kartu + `onDragStart` dicegah. Strip mengikuti kursor 1:1 seperti referensi (dianalisis dari rekaman: strip ikut kursor 1.100-2.400 px/s lalu berhenti saat tombol dilepas)
 - [x] Footer: hak cipta dan atribusi ikon rata kiri; ruang di bawah footer dikurangi (24px di desktop; mobile 64px agar baris panjang bisa digulir melewati tombol WhatsApp)
+- [x] Marquee: thumbnail kembali bisa diklik ke halaman detail. Penyebab: `setPointerCapture` dipasang saat mouse-down sehingga browser mengirim "click" ke kontainer, bukan ke tautan. Kini capture baru dipasang setelah gerakan melewati `DRAG_THRESHOLD` (5px). Tes: klik 4 kartu, klik dengan gerak 3px, dan ketuk di mobile
 - [ ] Foto sumber di `assets/images` dibatasi 2400px; zoom 4x pada foto landscape lebar agak lunak. Naikkan `MAX_SIDE` di `scripts/optimize-images.mjs` (mis. 3600) bila ingin lebih tajam, dengan konsekuensi ukuran aset naik
 - [ ] Foto Jayatama untuk hover Experience (sementara memakai foto produk: ritual-kulit, penanda-waktu, batu-kilau)
 
